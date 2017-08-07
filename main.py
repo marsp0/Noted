@@ -14,6 +14,7 @@ class MainWindow(Gtk.Window):
         #Header Bar
         hb = Gtk.HeaderBar()
         hb.set_show_close_button(True)
+        hb.connect("destroy",self.close_database)
         hb.props.title = "Noted"
         self.set_titlebar(hb)
         
@@ -40,12 +41,13 @@ class MainWindow(Gtk.Window):
         left_window = Gtk.Box(Gtk.Orientation.VERTICAL)
         left_window.set_size_request(200,400)
 
-        self.store = Gtk.ListStore(str)
+        self.store = Gtk.ListStore(str,int)
 
-        print self.store
 
         self.view = Gtk.TreeView(self.store)
         self.view.set_headers_visible(False)
+        self.view.connect("row_activated",self.show_note)
+        self.view.set_activate_on_single_click(True)
 
         renderer = Gtk.CellRendererText()
         col = Gtk.TreeViewColumn("Notes",renderer,text = 0)
@@ -62,6 +64,12 @@ class MainWindow(Gtk.Window):
         self.textbuffer = self.textview.get_buffer()
         scrolled_window.add(self.textview)
 
+        self.start_database()
+        if self.db:
+            self.id = max(self.db.keys())
+        else:
+            self.id = 0
+
         main_window.attach(left_window,0,0,1,1)
         main_window.attach(scrolled_window, 1, 0, 1, 1)
         self.add(main_window)
@@ -77,18 +85,43 @@ class MainWindow(Gtk.Window):
             title_limit = len(title)
         if len(title) > 20:
             title_limit = 20
-        self.store.append([title[:title_limit]])
+        self.store.append([title[:title_limit],self.id])
+        self.db[self.id] = self.textbuffer.get_text(self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter(),True)
+        self.id += 1
+
+
 
     def delete_note(self,button):
         item =  self.view.get_selection().get_selected()[1]
         self.store.remove(item)
     
     def start_database(self):
-        store = shelve.open("database")
-        return store
+        db = shelve.open("database.db")
+        self.db = db['notes']
+        print self.db
+        if not self.db:
+            self.db = {}
+        for item in self.db:
+            if len(self.db[item]) > 20:
+                title = self.db[item][:20]
+            else:
+                title = self.db[item]
+            self.store.append([title,item])
+        db.close()
 
+    def close_database(self,event):
+        db = shelve.open('database.db')
+        db['notes'] = self.db
+        db.close()
+        self.hide()
+        Gtk.main_quit()
+
+    def show_note(self,tree_view,path,col):
+        print path, type(path)
+        self.textbuffer.set_text(self.db[int(path.to_string())])
+        
 
 win = MainWindow()
-win.connect("delete-event", Gtk.main_quit)
+#win.connect("destroy",Gtk.main_quit)
 win.show_all()
 Gtk.main()
