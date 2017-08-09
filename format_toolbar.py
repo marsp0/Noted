@@ -32,10 +32,10 @@ class FormatBar(Gtk.Box):
 
 
 
-		self.font_size = Gtk.Button.new_with_label("Font Size")
+		#self.font_size = Gtk.Button.new_with_label("Font Size")
 
 
-		self.pack_end(self.font_size,False,False,0)
+		#self.pack_end(self.font_size,False,False,0)
 		self.pack_end(self.underline,False,False,0)
 		self.pack_end(self.italic,False,False,0)
 		self.pack_end(self.bold,False,False,0)

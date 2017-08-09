@@ -5,6 +5,7 @@ from gi.repository import Gtk,Gdk
 import format_toolbar as ft
 import sidebar as sb
 import editor
+import note
 import shelve
 
 
@@ -29,7 +30,7 @@ class MainWindow(Gtk.Window):
 		create_button = Gtk.Button()
 		create_button.connect("clicked",self.create_note)
 		create_button.props.relief = Gtk.ReliefStyle(0)
-		image = Gtk.Image.new_from_icon_name("document-new", Gtk.IconSize.DND)
+		image = Gtk.Image.new_from_icon_name("document-new", Gtk.IconSize.LARGE_TOOLBAR)
 		image.set_tooltip_text("New (Ctrl+N)")
 		image.show()
 		create_button.add(image)
@@ -40,7 +41,7 @@ class MainWindow(Gtk.Window):
 		save_button.connect("clicked",self.save_note)
 		save_button.props.relief = Gtk.ReliefStyle(0)
 
-		image = Gtk.Image.new_from_icon_name("document-save", Gtk.IconSize.DND)
+		image = Gtk.Image.new_from_icon_name("document-save", Gtk.IconSize.LARGE_TOOLBAR)
 		image.set_tooltip_text("Save (Ctrl+S)")
 		image.show()
 		save_button.add(image)
@@ -50,7 +51,7 @@ class MainWindow(Gtk.Window):
 		delete_button = Gtk.Button()
 		delete_button.connect("clicked",self.delete_note)
 		delete_button.props.relief = Gtk.ReliefStyle(0)
-		image = Gtk.Image.new_from_icon_name("edit-delete", Gtk.IconSize.DND)
+		image = Gtk.Image.new_from_icon_name("edit-delete", Gtk.IconSize.LARGE_TOOLBAR)
 		image.set_tooltip_text("Delete")
 		image.show()
 		delete_button.add(image)
@@ -92,10 +93,12 @@ class MainWindow(Gtk.Window):
 		self.add(main_window)
 	
 	def create_note(self,button):
-		title = self.get_title(self.editor.get_text())
+		title = self.get_title(self.editor.get_clean_text())
 		if title != '':
+			content = self.editor.get_text()
 			self.sidebar.add_item(title,self.id)
-			self.db[self.id] = self.editor.get_text()
+			note_item = note.Note(title,content,[])
+			self.db[self.id] = note_item
 			self.id += 1
 
 	def delete_note(self,button):
@@ -110,8 +113,7 @@ class MainWindow(Gtk.Window):
 		else:
 			self.db = db['notes']
 		for item in self.db:
-			title = self.get_title(self.db[item])
-			self.sidebar.add_item(title,item)
+			self.sidebar.add_item(self.db[item].get_title(),item)
 		db.close()
 
 	def close_database(self,event):
@@ -123,14 +125,15 @@ class MainWindow(Gtk.Window):
 
 	def show_note(self,tree_view,path,col):
 		item = self.sidebar.get_item(path)
-		self.editor.set_text(self.db[item])
+		self.editor.set_text(self.db[item].get_content())
 
 	def save_note(self,event):
 		path =  self.sidebar.get_selected()
 		if path != None:
-			formatt = self.editor.textbuffer.register_serialize_tagset()
-			print self.editor.textbuffer.serialize(self.editor.textbuffer,formatt,self.editor.textbuffer.get_start_iter(),self.editor.textbuffer.get_end_iter())
-			self.db[self.sidebar.get_item(path)] = self.editor.get_text()
+			title = self.get_title(self.editor.get_clean_text())
+			content = self.editor.get_text()
+			note_item = note.Note(title,content,[])
+			self.db[self.sidebar.get_item(path)] = note_item
 
 	def get_title(self,content):
 		title_index = content.find("\n")
