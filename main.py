@@ -70,6 +70,9 @@ class MainWindow(Gtk.Window):
 
 		#FORMAT TOOLBAR
 		self.format_toolbar = ft.FormatBar()
+		self.format_toolbar.bold.connect("clicked",self.on_button_clicked, 'bold')
+		self.format_toolbar.italic.connect("clicked",self.on_button_clicked, 'italic')
+		self.format_toolbar.underline.connect("clicked",self.on_button_clicked, 'underline')
 
 		#TAGS
 		self.tag_bar = Gtk.Entry()
@@ -89,7 +92,7 @@ class MainWindow(Gtk.Window):
 		self.add(main_window)
 	
 	def create_note(self,button):
-		title = self.editor.get_title()
+		title = self.get_title(self.editor.get_text())
 		if title != '':
 			self.sidebar.add_item(title,self.id)
 			self.db[self.id] = self.editor.get_text()
@@ -107,13 +110,7 @@ class MainWindow(Gtk.Window):
 		else:
 			self.db = db['notes']
 		for item in self.db:
-			title_index = self.db[item].find("\n")
-			if title_index < 20 and title_index != -1:
-				title = self.db[item][:title_index]
-			elif len(self.db[item]) > 20:
-				title = self.db[item][:20]
-			else:
-				title = self.db[item]
+			title = self.get_title(self.db[item])
 			self.sidebar.add_item(title,item)
 		db.close()
 
@@ -131,10 +128,22 @@ class MainWindow(Gtk.Window):
 	def save_note(self,event):
 		path =  self.sidebar.get_selected()
 		if path != None:
+			formatt = self.editor.textbuffer.register_serialize_tagset()
+			print self.editor.textbuffer.serialize(self.editor.textbuffer,formatt,self.editor.textbuffer.get_start_iter(),self.editor.textbuffer.get_end_iter())
 			self.db[self.sidebar.get_item(path)] = self.editor.get_text()
 
+	def get_title(self,content):
+		title_index = content.find("\n")
+		if title_index < 20 and title_index != -1:
+			title = content[:title_index]
+		elif len(content) > 20:
+			title = content[:20]
+		else:
+			title = content
+		return title
 		
-
+	def on_button_clicked(self,widget,tag):
+		self.editor.apply_tag(tag)
 win = MainWindow()
 win.show_all()
 Gtk.main()

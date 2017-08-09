@@ -10,21 +10,21 @@ class FormatBar(Gtk.Box):
 		Gtk.StyleContext.add_class(self.get_style_context(), "linked")
 
 		#bold
-		self.bold = Gtk.ToggleButton()
+		self.bold = Gtk.Button()
 		image =  Gtk.Image.new_from_icon_name("format-text-bold-symbolic", Gtk.IconSize.MENU)
 		image.show()
 		self.bold.add(image)
 		self.bold.set_tooltip_text("Bold (Ctrl+B)")
 
 		#Italic
-		self.italic = Gtk.ToggleButton()
+		self.italic = Gtk.Button()
 		image =  Gtk.Image.new_from_icon_name("format-text-italic-symbolic", Gtk.IconSize.MENU)
 		image.show()
 		self.italic.add(image)
 		self.italic.set_tooltip_text("Italic (Ctrl+I)")
 
 		#Underline
-		self.underline = Gtk.ToggleButton()
+		self.underline = Gtk.Button()
 		image =  Gtk.Image.new_from_icon_name("format-text-underline-symbolic", Gtk.IconSize.MENU)
 		image.show()
 		self.underline.add(image)
@@ -32,10 +32,10 @@ class FormatBar(Gtk.Box):
 
 
 
-		self.font_size = Gtk.ToggleButton.new_with_label("Font Size")
+		self.font_size = Gtk.Button.new_with_label("Font Size")
 
 
-		self.pack_end(self.font_size,False,True,0)
-		self.pack_end(self.underline,False,True,0)
-		self.pack_end(self.italic,False,True,0)
-		self.pack_end(self.bold,False,True,0)
+		self.pack_end(self.font_size,False,False,0)
+		self.pack_end(self.underline,False,False,0)
+		self.pack_end(self.italic,False,False,0)
+		self.pack_end(self.bold,False,False,0)
