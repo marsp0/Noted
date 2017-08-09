@@ -26,9 +26,10 @@ class Editor(Gtk.ScrolledWindow):
 		if title == '':
 			title = self.textbuffer.get_text(self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter(),False)
 			if title == '':
-				return
+				return ''
 		if len(title) > 20:
 			return title[:20]
+		return title
 
 	def get_text(self):
 

@@ -4,7 +4,9 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk,Gdk
 import format_toolbar as ft
 import sidebar as sb
+import editor
 import shelve
+
 
 class MainWindow(Gtk.Window):
 
@@ -23,46 +25,56 @@ class MainWindow(Gtk.Window):
 		box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
 		Gtk.StyleContext.add_class(box.get_style_context(), "linked")
 
-		save_button = Gtk.Button.new_with_label("Save")
-		save_button.connect("clicked",self.save_note)
-
-		hb.pack_end(save_button)
-
 		#Create Button
-		create_button = Gtk.Button.new_with_label("New")
+		create_button = Gtk.Button()
 		create_button.connect("clicked",self.create_note)
+		create_button.props.relief = Gtk.ReliefStyle(0)
+		image = Gtk.Image.new_from_icon_name("document-new", Gtk.IconSize.DND)
+		image.set_tooltip_text("New (Ctrl+N)")
+		image.show()
+		create_button.add(image)
 		box.add(create_button)
 
+		#save button
+		save_button = Gtk.Button()
+		save_button.connect("clicked",self.save_note)
+		save_button.props.relief = Gtk.ReliefStyle(0)
+
+		image = Gtk.Image.new_from_icon_name("document-save", Gtk.IconSize.DND)
+		image.set_tooltip_text("Save (Ctrl+S)")
+		image.show()
+		save_button.add(image)
+		box.add(save_button)
+
 		#Delete Button
-		delete_button = Gtk.Button.new_with_label("Delete")
+		delete_button = Gtk.Button()
 		delete_button.connect("clicked",self.delete_note)
-		box.add(delete_button)
+		delete_button.props.relief = Gtk.ReliefStyle(0)
+		image = Gtk.Image.new_from_icon_name("edit-delete", Gtk.IconSize.DND)
+		image.set_tooltip_text("Delete")
+		image.show()
+		delete_button.add(image)
+		hb.pack_end(delete_button)
 
 		hb.pack_start(box)
 
 		# MAIN WINDOW
 		main_window = Gtk.Grid(column_homogeneous=False, column_spacing=5, row_spacing=5)
 
+		#SIDEBAR
 		self.sidebar = sb.Sidebar()
 		self.sidebar.view.connect("row_activated",self.show_note)
 
-		scrolled_window = Gtk.ScrolledWindow()
-		scrolled_window.set_vexpand(True)
-		scrolled_window.set_hexpand(True)
-		self.textview = Gtk.TextView()
-		self.textview.set_wrap_mode(3)
-		self.textview.set_bottom_margin(5)
-		self.textview.set_top_margin(5)
-		self.textview.set_left_margin(5)
-		self.textview.set_right_margin(5)
-		self.textbuffer = self.textview.get_buffer()
+		#EDITOR
+		self.editor = editor.Editor()
 
+		#FORMAT TOOLBAR
 		self.format_toolbar = ft.FormatBar()
+
+		#TAGS
 		self.tag_bar = Gtk.Entry()
 		self.tag_bar.set_placeholder_text("Tags")
 		self.tag_bar.set_hexpand(True)
-
-		scrolled_window.add(self.textview)
 
 		self.start_database()
 		if self.db:
@@ -70,33 +82,18 @@ class MainWindow(Gtk.Window):
 		else:
 			self.id = 0
 
-		#label = Gtk.Label("Notes")
-		#main_window.attach(label,0,0,1,1)
-
-		#main_window.attach(left_window,0,0,1,2)
 		main_window.attach(self.sidebar,0,0,1,2)
-		main_window.attach(scrolled_window, 1, 0, 2, 1)
-		main_window.attach(self.format_toolbar,2,1,1,1)
+		main_window.attach(self.editor, 1, 0, 2, 1)
 		main_window.attach(self.tag_bar,1,1,1,1)
-
+		main_window.attach(self.format_toolbar,2,1,1,1)
 		self.add(main_window)
 	
 	def create_note(self,button):
-		#limit of chars for the title of the note
-		title_limit = -2
-		#get the actual title
-		title = self.textbuffer.get_text(self.textbuffer.get_start_iter(), self.textbuffer.get_iter_at_line(1), False)
-		#if title is empty then it means that there is only 1 line of note
-		if title == '':
-			title = self.textbuffer.get_text(self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter(),False)
-			if title == '':
-				return
-			title_limit = len(title)
-		if len(title) > 20:
-			title_limit = 20
-		self.sidebar.add_item(title,self.id)
-		self.db[self.id] = self.textbuffer.get_text(self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter(),True)
-		self.id += 1
+		title = self.editor.get_title()
+		if title != '':
+			self.sidebar.add_item(title,self.id)
+			self.db[self.id] = self.editor.get_text()
+			self.id += 1
 
 	def delete_note(self,button):
 		item = self.sidebar.remove_item()
@@ -129,15 +126,15 @@ class MainWindow(Gtk.Window):
 
 	def show_note(self,tree_view,path,col):
 		item = self.sidebar.get_item(path)
-		self.textbuffer.set_text(self.db[item])
+		self.editor.set_text(self.db[item])
 
 	def save_note(self,event):
 		path =  self.sidebar.get_selected()
-		self.db[self.sidebar.get_item(path)] = self.textbuffer.get_text(self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter(),True)
+		if path != None:
+			self.db[self.sidebar.get_item(path)] = self.editor.get_text()
 
 		
 
 win = MainWindow()
-#win.connect("destroy",Gtk.main_quit)
 win.show_all()
 Gtk.main()

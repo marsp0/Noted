@@ -6,12 +6,11 @@ from gi.repository import Gtk,Gdk
 class Sidebar(Gtk.VBox):
 
 	def __init__(self):
-		Gtk.VBox.__init__(self, homogeneous=False)
+		Gtk.VBox.__init__(self,False,0)
 		self.set_size_request(200,400)
 		self.scrolled_window = Gtk.ScrolledWindow()
 
-		#Notes Label
-		self.title = Gtk.Label("Notes")
+		self.set_homogeneous(False)
 
 		#TreeStore
 		self.store = Gtk.ListStore(str,int)
@@ -30,7 +29,6 @@ class Sidebar(Gtk.VBox):
 		
 		#add
 		self.scrolled_window.add(self.view)
-		self.add(self.title)
 		self.add(self.scrolled_window)
 
 	def add_item(self,title,note_id):
@@ -42,7 +40,7 @@ class Sidebar(Gtk.VBox):
 			to_return = self.store[item][1]
 			self.store.remove(item)
 			return to_return
-			
+
 	def get_item(self,path):
 		return self.store[path][1]
 
