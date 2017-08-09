@@ -3,6 +3,7 @@ gi.require_version('Gtk', '3.0')
 #gi.require_version('Granite', '1.0')
 from gi.repository import Gtk,Gdk
 import format_toolbar as ft
+import sidebar as sb
 import shelve
 
 class MainWindow(Gtk.Window):
@@ -39,36 +40,11 @@ class MainWindow(Gtk.Window):
 
 		hb.pack_start(box)
 
-		#main Window
+		# MAIN WINDOW
 		main_window = Gtk.Grid(column_homogeneous=False, column_spacing=5, row_spacing=5)
 
-
-		main_left = Gtk.ScrolledWindow()
-
-		left_window = Gtk.VBox(homogeneous=False)
-		left_window.set_size_request(200,400)
-
-		self.store = Gtk.ListStore(str,int)
-
-
-		self.view = Gtk.TreeView(self.store)
-		self.view.set_headers_visible(False)
-		self.view.modify_bg(Gtk.StateType.NORMAL,Gdk.Color.parse('#F6F6F5')[1])
-		self.view.modify_bg(Gtk.StateType.SELECTED, Gdk.Color.parse('#2980b9')[1])
-		self.view.modify_fg(Gtk.StateType.SELECTED, Gdk.Color.parse('#ffffff')[1])
-		self.view.connect("row_activated",self.show_note)
-		self.view.set_activate_on_single_click(True)
-
-		renderer = Gtk.CellRendererText()
-		col = Gtk.TreeViewColumn("Notes",renderer,text = 0)
-		self.view.append_column(col)
-
-		
-
-		main_left.add(self.view)
-
-		
-		left_window.add(main_left)
+		self.sidebar = sb.Sidebar()
+		self.sidebar.view.connect("row_activated",self.show_note)
 
 		scrolled_window = Gtk.ScrolledWindow()
 		scrolled_window.set_vexpand(True)
@@ -82,9 +58,9 @@ class MainWindow(Gtk.Window):
 		self.textbuffer = self.textview.get_buffer()
 
 		self.format_toolbar = ft.FormatBar()
-		self.title = Gtk.Entry()
-		self.title.set_placeholder_text("Tags")
-		self.title.set_hexpand(True)
+		self.tag_bar = Gtk.Entry()
+		self.tag_bar.set_placeholder_text("Tags")
+		self.tag_bar.set_hexpand(True)
 
 		scrolled_window.add(self.textview)
 
@@ -97,10 +73,11 @@ class MainWindow(Gtk.Window):
 		#label = Gtk.Label("Notes")
 		#main_window.attach(label,0,0,1,1)
 
-		main_window.attach(left_window,0,0,1,1)
+		#main_window.attach(left_window,0,0,1,2)
+		main_window.attach(self.sidebar,0,0,1,2)
 		main_window.attach(scrolled_window, 1, 0, 2, 1)
 		main_window.attach(self.format_toolbar,2,1,1,1)
-		main_window.attach(self.title,1,1,1,1)
+		main_window.attach(self.tag_bar,1,1,1,1)
 
 		self.add(main_window)
 	
@@ -117,17 +94,14 @@ class MainWindow(Gtk.Window):
 			title_limit = len(title)
 		if len(title) > 20:
 			title_limit = 20
-		self.store.append([title[:title_limit],self.id])
+		self.sidebar.add_item(title,self.id)
 		self.db[self.id] = self.textbuffer.get_text(self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter(),True)
 		self.id += 1
 
-
-
 	def delete_note(self,button):
-		item =  self.view.get_selection().get_selected()[1]
+		item = self.sidebar.remove_item()
 		if item != None:
-			del self.db[self.store[item][1]]
-			self.store.remove(item)
+			del self.db[item]
 	
 	def start_database(self):
 		db = shelve.open("database.db")
@@ -143,7 +117,7 @@ class MainWindow(Gtk.Window):
 				title = self.db[item][:20]
 			else:
 				title = self.db[item]
-			self.store.append([title,item])
+			self.sidebar.add_item(title,item)
 		db.close()
 
 	def close_database(self,event):
@@ -154,11 +128,12 @@ class MainWindow(Gtk.Window):
 		Gtk.main_quit()
 
 	def show_note(self,tree_view,path,col):
-		self.textbuffer.set_text(self.db[self.store[path][1]])
+		item = self.sidebar.get_item(path)
+		self.textbuffer.set_text(self.db[item])
 
 	def save_note(self,event):
-		item =  self.view.get_selection().get_selected()[1]
-		self.db[self.store[item][1]] = self.textbuffer.get_text(self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter(),True)
+		path =  self.sidebar.get_selected()
+		self.db[self.sidebar.get_item(path)] = self.textbuffer.get_text(self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter(),True)
 
 		
 
