@@ -24,7 +24,7 @@ class MainWindow(Gtk.Window):
 
 		save_button = Gtk.Button.new_with_label("Save")
 		save_button.connect("clicked",self.save_note)
-		#save_button.modify_bg(Gtk.StateType.NORMAL,Gdk.Color.parse('#2796BC')[1])
+
 		hb.pack_end(save_button)
 
 		#Create Button
@@ -42,11 +42,6 @@ class MainWindow(Gtk.Window):
 		#main Window
 		main_window = Gtk.Grid(column_homogeneous=False, column_spacing=5, row_spacing=5)
 
-		
-
-
-
-
 
 		main_left = Gtk.ScrolledWindow()
 
@@ -59,6 +54,8 @@ class MainWindow(Gtk.Window):
 		self.view = Gtk.TreeView(self.store)
 		self.view.set_headers_visible(False)
 		self.view.modify_bg(Gtk.StateType.NORMAL,Gdk.Color.parse('#F6F6F5')[1])
+		self.view.modify_bg(Gtk.StateType.SELECTED, Gdk.Color.parse('#2980b9')[1])
+		self.view.modify_fg(Gtk.StateType.SELECTED, Gdk.Color.parse('#ffffff')[1])
 		self.view.connect("row_activated",self.show_note)
 		self.view.set_activate_on_single_click(True)
 
@@ -70,9 +67,7 @@ class MainWindow(Gtk.Window):
 
 		main_left.add(self.view)
 
-		label = Gtk.Label("Notes")
-		label.set_size_request(100,100)
-		left_window.add(label)
+		
 		left_window.add(main_left)
 
 		scrolled_window = Gtk.ScrolledWindow()
@@ -80,24 +75,32 @@ class MainWindow(Gtk.Window):
 		scrolled_window.set_hexpand(True)
 		self.textview = Gtk.TextView()
 		self.textview.set_wrap_mode(3)
+		self.textview.set_bottom_margin(5)
+		self.textview.set_top_margin(5)
+		self.textview.set_left_margin(5)
+		self.textview.set_right_margin(5)
 		self.textbuffer = self.textview.get_buffer()
 
 		self.format_toolbar = ft.FormatBar()
 		self.title = Gtk.Entry()
+		self.title.set_placeholder_text("Tags")
 		self.title.set_hexpand(True)
 
 		scrolled_window.add(self.textview)
 
 		self.start_database()
 		if self.db:
-			self.id = max(self.db.keys())
+			self.id = max(self.db.keys())+1
 		else:
 			self.id = 0
 
-		main_window.attach(left_window,0,0,1,2)
-		main_window.attach(scrolled_window, 1, 1, 2, 1)
-		main_window.attach(self.format_toolbar,2,0,1,1)
-		main_window.attach(self.title,1,0,1,1)
+		#label = Gtk.Label("Notes")
+		#main_window.attach(label,0,0,1,1)
+
+		main_window.attach(left_window,0,0,1,1)
+		main_window.attach(scrolled_window, 1, 0, 2, 1)
+		main_window.attach(self.format_toolbar,2,1,1,1)
+		main_window.attach(self.title,1,1,1,1)
 
 		self.add(main_window)
 	
@@ -111,14 +114,11 @@ class MainWindow(Gtk.Window):
 			title = self.textbuffer.get_text(self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter(),False)
 			if title == '':
 				return
-			print '123'
 			title_limit = len(title)
 		if len(title) > 20:
 			title_limit = 20
 		self.store.append([title[:title_limit],self.id])
-		print 'dsa'
 		self.db[self.id] = self.textbuffer.get_text(self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter(),True)
-		print self.db
 		self.id += 1
 
 
@@ -138,7 +138,6 @@ class MainWindow(Gtk.Window):
 		for item in self.db:
 			title_index = self.db[item].find("\n")
 			if title_index < 20 and title_index != -1:
-				print title_index
 				title = self.db[item][:title_index]
 			elif len(self.db[item]) > 20:
 				title = self.db[item][:20]
