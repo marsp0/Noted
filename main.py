@@ -139,7 +139,7 @@ class MainWindow(Gtk.Window):
 		
 	def on_button_clicked(self,widget,tag):
 
-		self.editor.apply_tag(tag)
+		self.editor.toggle_tag(tag)
 
 	def modify_font(self,event):
 		font_description = event.get_font_desc()

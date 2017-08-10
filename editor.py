@@ -38,17 +38,25 @@ class Editor(Gtk.ScrolledWindow):
 
 		self.textbuffer.set_text("")
 		if content != "":
+			print self.textview.get_monospace()
 			self.textbuffer.deserialize(self.textbuffer,self.deserialized_format,self.textbuffer.get_start_iter(),content)
 		else:
 			pass
 
 
-	def apply_tag(self,tag):
-
+	def toggle_tag(self,tag):
 		limits = self.textbuffer.get_selection_bounds()
 		if len(limits) != 0:
 			start,end = limits
-			self.textbuffer.apply_tag(self.tags[tag],start,end)
+			tag_list = start.get_tags()
+			to_apply = True
+			if len(tag_list) != 0:
+				for item in tag_list:
+					if item.props.name == tag:
+						self.textbuffer.remove_tag(self.tags[tag],start,end)
+						to_apply = False
+			if to_apply:
+				self.textbuffer.apply_tag(self.tags[tag],start,end)
 
 	def get_clean_text(self):
 
