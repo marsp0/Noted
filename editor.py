@@ -27,6 +27,10 @@ class Editor(Gtk.ScrolledWindow):
 		self.tags['bold'] = self.textbuffer.create_tag("bold",weight=Pango.Weight.BOLD)
 		self.tags['italic'] = self.textbuffer.create_tag("italic",style=Pango.Style.ITALIC)
 		self.tags['underline'] = self.textbuffer.create_tag("underline",underline=Pango.Underline.SINGLE)
+		self.tags['open_sans'] = self.textbuffer.create_tag("sans",family = "Open Sans")
+		self.tags['calibri'] = self.textbuffer.create_tag("calibri", family = "Calibri")
+
+		#self.connect("key-press-event",self.apply_tag)
 
 		self.add(self.textview)
 
@@ -38,29 +42,30 @@ class Editor(Gtk.ScrolledWindow):
 
 		self.textbuffer.set_text("")
 		if content != "":
-			print self.textview.get_monospace()
 			self.textbuffer.deserialize(self.textbuffer,self.deserialized_format,self.textbuffer.get_start_iter(),content)
 		else:
 			pass
 
 
-	def toggle_tag(self,tag):
+	def toggle_tag(self,tag,data):
 		limits = self.textbuffer.get_selection_bounds()
+		to_apply = True
 		if len(limits) != 0:
 			start,end = limits
-			tag_list = start.get_tags()
-			to_apply = True
-			if len(tag_list) != 0:
-				for item in tag_list:
-					if item.props.name == tag:
-						self.textbuffer.remove_tag(self.tags[tag],start,end)
-						to_apply = False
+			if tag == "font":
+				self.tags[tag].props.font = data.to_string()
+			else:
+				tag_list = start.get_tags()
+				if len(tag_list) != 0:
+					for item in tag_list:
+						if item.props.name == tag:
+							self.textbuffer.remove_tag(self.tags[tag],start,end)
+							to_apply = False
 			if to_apply:
 				self.textbuffer.apply_tag(self.tags[tag],start,end)
+				#print self.tags[tag].props.font
+
 
 	def get_clean_text(self):
 
 		return self.textbuffer.get_text(self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter(),False)
-
-	def modify_font(self,font_description):
-		self.textview.modify_font(font_description)
