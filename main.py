@@ -4,6 +4,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk,Gdk
 import format_toolbar as ft
 import sidebar as sb
+import headerbar as hb
 import editor
 import note
 import shelve
@@ -17,47 +18,18 @@ class MainWindow(Gtk.Window):
 		self.set_size_request(1000, 800)
 		
 		#Header Bar
-		hb = Gtk.HeaderBar()
-		hb.set_show_close_button(True)
-		hb.connect("destroy",self.close_database)
-		hb.props.title = "Noted"
-		self.set_titlebar(hb)
+		hbar = hb.Headerbar()
+		hbar.connect("destroy",self.close_database)
+		self.set_titlebar(hbar)
 		
-		box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-		Gtk.StyleContext.add_class(box.get_style_context(), "linked")
-
 		#Create Button
-		create_button = Gtk.Button()
-		create_button.connect("clicked",self.create_note)
-		create_button.props.relief = Gtk.ReliefStyle(0)
-		image = Gtk.Image.new_from_icon_name("document-new", Gtk.IconSize.LARGE_TOOLBAR)
-		image.set_tooltip_text("New (Ctrl+N)")
-		image.show()
-		create_button.add(image)
-		box.add(create_button)
+		hbar.create_button.connect("clicked",self.create_note)
 
-		#save button
-		save_button = Gtk.Button()
-		save_button.connect("clicked",self.save_note)
-		save_button.props.relief = Gtk.ReliefStyle(0)
-
-		image = Gtk.Image.new_from_icon_name("document-save", Gtk.IconSize.LARGE_TOOLBAR)
-		image.set_tooltip_text("Save (Ctrl+S)")
-		image.show()
-		save_button.add(image)
-		box.add(save_button)
+		#Save button
+		hbar.save_button.connect("clicked",self.save_note)
 
 		#Delete Button
-		delete_button = Gtk.Button()
-		delete_button.connect("clicked",self.delete_note)
-		delete_button.props.relief = Gtk.ReliefStyle(0)
-		image = Gtk.Image.new_from_icon_name("edit-delete", Gtk.IconSize.LARGE_TOOLBAR)
-		image.set_tooltip_text("Delete")
-		image.show()
-		delete_button.add(image)
-		hb.pack_end(delete_button)
-
-		hb.pack_start(box)
+		hbar.delete_button.connect("clicked",self.delete_note)
 
 		# MAIN WINDOW
 		main_window = Gtk.Grid(column_homogeneous=False, column_spacing=5, row_spacing=5)
@@ -81,10 +53,7 @@ class MainWindow(Gtk.Window):
 		self.tag_bar.set_hexpand(True)
 
 		self.start_database()
-		if self.db:
-			self.id = max(self.db.keys())+1
-		else:
-			self.id = 0
+		
 
 		main_window.attach(self.sidebar,0,0,1,2)
 		main_window.attach(self.editor, 1, 0, 2, 1)
@@ -93,30 +62,38 @@ class MainWindow(Gtk.Window):
 		self.add(main_window)
 	
 	def create_note(self,button):
-		title = self.get_title(self.editor.get_clean_text())
-		if title != '':
-			content = self.editor.get_text()
-			self.sidebar.add_item(title,self.id)
-			note_item = note.Note(title,content,[])
-			self.db[self.id] = note_item
-			self.id += 1
+
+		self.sidebar.add_item("New Note", self.id)
+		self.editor.set_text("")
+		note_item = note.Note("New Note", "", [])
+		self.db[self.id] = note_item
+		self.id += 1
 
 	def delete_note(self,button):
+
 		item = self.sidebar.remove_item()
 		if item != None:
 			del self.db[item]
 	
 	def start_database(self):
+
 		db = shelve.open("database.db")
 		if not db:
 			self.db = {}
 		else:
 			self.db = db['notes']
+
 		for item in self.db:
 			self.sidebar.add_item(self.db[item].get_title(),item)
+		
+		if self.db:
+			self.id = max(self.db.keys())+1
+		else:
+			self.id = 0
 		db.close()
 
 	def close_database(self,event):
+		print self.db
 		db = shelve.open('database.db')
 		db['notes'] = self.db
 		db.close()
@@ -124,18 +101,30 @@ class MainWindow(Gtk.Window):
 		Gtk.main_quit()
 
 	def show_note(self,tree_view,path,col):
+
 		item = self.sidebar.get_item(path)
 		self.editor.set_text(self.db[item].get_content())
 
 	def save_note(self,event):
+
 		path =  self.sidebar.get_selected()
 		if path != None:
-			title = self.get_title(self.editor.get_clean_text())
+			clean_text = self.editor.get_clean_text()
+			if clean_text != "":
+				title = self.get_title(clean_text)
+				
+			else:
+				title = "New Note"
+
 			content = self.editor.get_text()
 			note_item = note.Note(title,content,[])
 			self.db[self.sidebar.get_item(path)] = note_item
+			self.sidebar.modify_item(path,title)
+
 
 	def get_title(self,content):
+
+		content = content.lstrip()
 		title_index = content.find("\n")
 		if title_index < 20 and title_index != -1:
 			title = content[:title_index]
@@ -146,7 +135,10 @@ class MainWindow(Gtk.Window):
 		return title
 		
 	def on_button_clicked(self,widget,tag):
+
 		self.editor.apply_tag(tag)
+
+
 win = MainWindow()
 win.show_all()
 Gtk.main()

@@ -7,6 +7,7 @@ import format_toolbar as ft
 class Editor(Gtk.ScrolledWindow):
 
 	def __init__(self):
+
 		Gtk.ScrolledWindow.__init__(self)
 		self.set_vexpand(True)
 		self.set_hexpand(True)
@@ -34,14 +35,21 @@ class Editor(Gtk.ScrolledWindow):
 		return self.textbuffer.serialize(self.textbuffer,self.serialized_format,self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter())
 
 	def set_text(self,content):
+
 		self.textbuffer.set_text("")
-		self.textbuffer.deserialize(self.textbuffer,self.deserialized_format,self.textbuffer.get_start_iter(),content)
+		if content != "":
+			self.textbuffer.deserialize(self.textbuffer,self.deserialized_format,self.textbuffer.get_start_iter(),content)
+		else:
+			pass
+
 
 	def apply_tag(self,tag):
+
 		limits = self.textbuffer.get_selection_bounds()
 		if len(limits) != 0:
 			start,end = limits
 			self.textbuffer.apply_tag(self.tags[tag],start,end)
 
 	def get_clean_text(self):
+		
 		return self.textbuffer.get_text(self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter(),False)
