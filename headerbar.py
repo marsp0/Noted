@@ -6,7 +6,7 @@ from gi.repository import Gtk,Gdk
 class Headerbar(Gtk.HeaderBar):
 
 	def __init__(self):
-		
+
 		Gtk.HeaderBar.__init__(self)
 
 
@@ -20,7 +20,7 @@ class Headerbar(Gtk.HeaderBar):
 		self.create_button = Gtk.Button()
 		self.create_button.props.relief = Gtk.ReliefStyle(0)
 		image = Gtk.Image.new_from_icon_name("document-new", Gtk.IconSize.LARGE_TOOLBAR)
-		image.set_tooltip_text("New (Ctrl+N)")
+		image.set_tooltip_text("New Note")
 		image.show()
 		self.create_button.add(image)
 		box.add(self.create_button)
@@ -30,7 +30,7 @@ class Headerbar(Gtk.HeaderBar):
 		self.save_button.props.relief = Gtk.ReliefStyle(0)
 
 		image = Gtk.Image.new_from_icon_name("document-save", Gtk.IconSize.LARGE_TOOLBAR)
-		image.set_tooltip_text("Save (Ctrl+S)")
+		image.set_tooltip_text("Save Note")
 		image.show()
 		self.save_button.add(image)
 		box.add(self.save_button)
@@ -39,7 +39,7 @@ class Headerbar(Gtk.HeaderBar):
 		self.delete_button = Gtk.Button()
 		self.delete_button.props.relief = Gtk.ReliefStyle(0)
 		image = Gtk.Image.new_from_icon_name("edit-delete", Gtk.IconSize.LARGE_TOOLBAR)
-		image.set_tooltip_text("Delete")
+		image.set_tooltip_text("Delete Note")
 		image.show()
 		self.delete_button.add(image)
 		self.pack_end(self.delete_button)

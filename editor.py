@@ -51,5 +51,8 @@ class Editor(Gtk.ScrolledWindow):
 			self.textbuffer.apply_tag(self.tags[tag],start,end)
 
 	def get_clean_text(self):
-		
+
 		return self.textbuffer.get_text(self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter(),False)
+
+	def modify_font(self,font_description):
+		self.textview.modify_font(font_description)

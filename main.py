@@ -46,6 +46,9 @@ class MainWindow(Gtk.Window):
 		self.format_toolbar.bold.connect("clicked",self.on_button_clicked, 'bold')
 		self.format_toolbar.italic.connect("clicked",self.on_button_clicked, 'italic')
 		self.format_toolbar.underline.connect("clicked",self.on_button_clicked, 'underline')
+		self.format_toolbar.font.connect("font-set",self.modify_font)
+
+		#self.editor.connect("key-release-event",self.key_press)
 
 		#TAGS
 		self.tag_bar = Gtk.Entry()
@@ -138,6 +141,9 @@ class MainWindow(Gtk.Window):
 
 		self.editor.apply_tag(tag)
 
+	def modify_font(self,event):
+		font_description = event.get_font_desc()
+		self.editor.modify_font(font_description)
 
 win = MainWindow()
 win.show_all()
