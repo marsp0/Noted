@@ -36,7 +36,8 @@ class Editor(Gtk.Grid):
 		self.tags['open_sans'] = self.textbuffer.create_tag("sans",family = "Open Sans")
 		self.tags['calibri'] = self.textbuffer.create_tag("calibri", family = "Calibri")
 
-		self.connect("key-press-event",self.apply_tag)
+		self.textview.connect("key-press-event",self.apply_tag)
+		self.textview.connect("key-release-event",self.apply_tag)
 
 		#TAGS
 		self.tag_bar = Gtk.Entry()
@@ -61,7 +62,7 @@ class Editor(Gtk.Grid):
 		return self.textbuffer.serialize(self.textbuffer,self.serialized_format,self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter())
 
 	def set_text(self,content):
-
+		print content
 		self.textbuffer.set_text("")
 		if content != "":
 			self.textbuffer.deserialize(self.textbuffer,self.deserialized_format,self.textbuffer.get_start_iter(),content)
@@ -90,13 +91,11 @@ class Editor(Gtk.Grid):
 		return self.textbuffer.get_text(self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter(),False)
 
 	def apply_tag(self,widget,key):
-		print 
 		try:
 			if ord(key.string) >= 32:
-				start_index = self.textbuffer.props.cursor_position-1
-				start_iter = self.textbuffer.get_iter_at_offset(start_index)
+				start_index = self.textbuffer.props.cursor_position
+				start_iter = self.textbuffer.get_iter_at_offset(start_index-1)
 				end_iter = self.textbuffer.get_iter_at_offset(start_index+1)
 				self.textbuffer.apply_tag(self.tags['bold'],start_iter,end_iter)
-				print 'dsa'
 		except TypeError:
 			pass
