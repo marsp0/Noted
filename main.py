@@ -32,7 +32,7 @@ class MainWindow(Gtk.Window):
 		hbar.delete_button.connect("clicked",self.delete_note)
 
 		# MAIN WINDOW
-		main_window = Gtk.Grid(column_homogeneous=False, column_spacing=5, row_spacing=5)
+		main_window = Gtk.Grid(column_homogeneous=False, column_spacing=5)
 
 		#SIDEBAR
 		self.sidebar = sb.Sidebar()
@@ -41,28 +41,11 @@ class MainWindow(Gtk.Window):
 		#EDITOR
 		self.editor = editor.Editor()
 
-		#FORMAT TOOLBAR
-		self.format_toolbar = ft.FormatBar()
-		self.format_toolbar.bold.connect("clicked",self.on_button_clicked, 'bold')
-		self.format_toolbar.italic.connect("clicked",self.on_button_clicked, 'italic')
-		self.format_toolbar.underline.connect("clicked",self.on_button_clicked, 'underline')
-		self.format_toolbar.calibri.connect("clicked", self.on_button_clicked,'calibri')
-		self.format_toolbar.open_sans.connect("clicked", self.on_button_clicked,'open_sans')
-
-		#self.editor.connect("key-release-event",self.key_press)
-
-		#TAGS
-		self.tag_bar = Gtk.Entry()
-		self.tag_bar.set_placeholder_text("Tags")
-		self.tag_bar.set_hexpand(True)
-
 		self.start_database()
 		
 
 		main_window.attach(self.sidebar,0,0,1,2)
 		main_window.attach(self.editor, 1, 0, 2, 1)
-		main_window.attach(self.tag_bar,1,1,1,1)
-		main_window.attach(self.format_toolbar,2,1,1,1)
 		self.add(main_window)
 	
 	def create_note(self,button):
