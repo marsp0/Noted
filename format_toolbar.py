@@ -31,17 +31,15 @@ class FormatBar(Gtk.Box):
 		self.underline.add(image)
 		self.underline.set_tooltip_text("Underline")
 
-		self.calibri = Gtk.Button.new_with_label("Calibri")
-		self.open_sans = Gtk.Button.new_with_label("Open Sans")
-
+		self.ubuntu = Gtk.ToggleButton.new_with_label("Ubuntu Mono")
 
 		self.buttons = {}
 		self.buttons['bold'] = self.bold
 		self.buttons['italic'] = self.italic
 		self.buttons['underline'] = self.underline
+		self.buttons['ubuntu'] = self.ubuntu
 
-		self.pack_end(self.open_sans,False,False,0)
-		self.pack_end(self.calibri,False,False,0)
+		self.pack_end(self.ubuntu,False,False,0)
 		self.pack_end(self.underline,False,False,0)
 		self.pack_end(self.italic,False,False,0)
 		self.pack_end(self.bold,False,False,0)

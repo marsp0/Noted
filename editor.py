@@ -33,8 +33,7 @@ class Editor(Gtk.Grid):
 		self.tags['bold'] = self.textbuffer.create_tag("bold",weight=Pango.Weight.BOLD)
 		self.tags['italic'] = self.textbuffer.create_tag("italic",style=Pango.Style.ITALIC)
 		self.tags['underline'] = self.textbuffer.create_tag("underline",underline=Pango.Underline.SINGLE)
-		self.tags['open_sans'] = self.textbuffer.create_tag("sans",family = "Open Sans")
-		self.tags['calibri'] = self.textbuffer.create_tag("calibri", family = "Calibri")
+		self.tags['ubuntu'] = self.textbuffer.create_tag("ubuntu", family = "Ubuntu Mono")
 
 		self.textbuffer.connect_after("insert-text",self.insert_with_tags)
 
@@ -48,8 +47,7 @@ class Editor(Gtk.Grid):
 		self.format_toolbar.bold.connect("clicked",self.toggle_tag, 'bold')
 		self.format_toolbar.italic.connect("clicked",self.toggle_tag, 'italic')
 		self.format_toolbar.underline.connect("clicked",self.toggle_tag, 'underline')
-		self.format_toolbar.calibri.connect("clicked", self.toggle_tag,'calibri')
-		self.format_toolbar.open_sans.connect("clicked", self.toggle_tag,'open_sans')
+		self.format_toolbar.ubuntu.connect("clicked", self.toggle_tag,'ubuntu')
 
 
 		self.attach(self.scrolled_window,0,0,2,1)
@@ -61,11 +59,10 @@ class Editor(Gtk.Grid):
 		return self.textbuffer.serialize(self.textbuffer,self.serialized_format,self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter())
 
 	def set_text(self,content):
-		print content
 		self.textbuffer.set_text("")
+		print content
 		if content != "":
 			self.textbuffer.deserialize(self.textbuffer,self.deserialized_format,self.textbuffer.get_start_iter(),content)
-			print self.get_clean_text()
 		else:
 			pass
 
@@ -78,12 +75,11 @@ class Editor(Gtk.Grid):
 			tag_list = start.get_tags()
 			if len(tag_list) != 0:
 				for item in tag_list:
-					if item.props.name == tag:
+					if item.props.name == tag and self.format_toolbar.buttons[tag].get_active() == False:
 						self.textbuffer.remove_tag(self.tags[tag],start,end)
 						to_apply = False
 			if to_apply:
 				self.textbuffer.apply_tag(self.tags[tag],start,end)
-				#print self.tags[tag].props.font
 
 
 	def get_clean_text(self):
