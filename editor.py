@@ -36,8 +36,7 @@ class Editor(Gtk.Grid):
 		self.tags['open_sans'] = self.textbuffer.create_tag("sans",family = "Open Sans")
 		self.tags['calibri'] = self.textbuffer.create_tag("calibri", family = "Calibri")
 
-		self.textview.connect("key-press-event",self.apply_tag)
-		self.textview.connect("key-release-event",self.apply_tag)
+		self.textbuffer.connect_after("insert-text",self.insert_with_tags)
 
 		#TAGS
 		self.tag_bar = Gtk.Entry()
@@ -66,6 +65,7 @@ class Editor(Gtk.Grid):
 		self.textbuffer.set_text("")
 		if content != "":
 			self.textbuffer.deserialize(self.textbuffer,self.deserialized_format,self.textbuffer.get_start_iter(),content)
+			print self.get_clean_text()
 		else:
 			pass
 
@@ -90,12 +90,14 @@ class Editor(Gtk.Grid):
 
 		return self.textbuffer.get_text(self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter(),False)
 
-	def apply_tag(self,widget,key):
-		try:
-			if ord(key.string) >= 32:
-				start_index = self.textbuffer.props.cursor_position
-				start_iter = self.textbuffer.get_iter_at_offset(start_index-1)
-				end_iter = self.textbuffer.get_iter_at_offset(start_index+1)
-				self.textbuffer.apply_tag(self.tags['bold'],start_iter,end_iter)
-		except TypeError:
-			pass
+	def insert_with_tags(self,buffer,start_iter,data,data_len):
+		#for some reason it fucks up the formatting when doing the initial deserialization
+		#if we move back on a larger string
+		#NOTE : Figure out what is happening
+		if data_len == 1:
+			start_iter.backward_char()
+		end = self.textbuffer.props.cursor_position
+		end_iter = self.textbuffer.get_iter_at_offset(end)
+		for tag in self.format_toolbar.buttons:
+			if self.format_toolbar.buttons[tag].get_active():
+				self.textbuffer.apply_tag(self.tags[tag],start_iter,end_iter)
