@@ -34,6 +34,10 @@ class Editor(Gtk.Grid):
 		self.tags['italic'] = self.textbuffer.create_tag("italic",style=Pango.Style.ITALIC)
 		self.tags['underline'] = self.textbuffer.create_tag("underline",underline=Pango.Underline.SINGLE)
 		self.tags['ubuntu'] = self.textbuffer.create_tag("ubuntu", family = "Ubuntu Mono")
+		for i in xrange(1,61):
+			self.tags[str(i)] = self.textbuffer.create_tag(str(i),font_desc=Pango.FontDescription.from_string(str(i)))
+
+		print self.tags
 
 		self.textbuffer.connect_after("insert-text",self.insert_with_tags)
 
@@ -41,6 +45,8 @@ class Editor(Gtk.Grid):
 		self.tag_bar = Gtk.Entry()
 		self.tag_bar.set_placeholder_text("Tags")
 		self.tag_bar.set_hexpand(True)
+
+		self.counter = 1
 
 		#FORMAT TOOLBAR
 		self.format_toolbar = ft.FormatBar()
@@ -97,3 +103,11 @@ class Editor(Gtk.Grid):
 		for tag in self.format_toolbar.buttons:
 			if self.format_toolbar.buttons[tag].get_active():
 				self.textbuffer.apply_tag(self.tags[tag],start_iter,end_iter)
+		font = int(self.format_toolbar.size.get_text())
+		if font < 1:
+			font = 1
+			self.format_toolbar.size.set_text("1")
+		elif font > 60:
+			font = 60
+			self.format_toolbar.size.set_text('60')
+		self.textbuffer.apply_tag(self.tags[str(font)],start_iter,end_iter)

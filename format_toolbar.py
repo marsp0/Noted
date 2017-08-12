@@ -31,14 +31,26 @@ class FormatBar(Gtk.Box):
 		self.underline.add(image)
 		self.underline.set_tooltip_text("Underline")
 
+		#ubuntu font
 		self.ubuntu = Gtk.ToggleButton.new_with_label("Ubuntu Mono")
+
+		#font size
+		self.size = Gtk.Entry()
+		self.size.set_text(str(12))
+		self.size.set_max_width_chars(4)
+		self.size.set_width_chars(4)
+		self.size.set_max_length(2)
+
 
 		self.buttons = {}
 		self.buttons['bold'] = self.bold
 		self.buttons['italic'] = self.italic
 		self.buttons['underline'] = self.underline
 		self.buttons['ubuntu'] = self.ubuntu
+		#no need to add size as it is not being toggled
+		#self.buttons['size'] = self.size
 
+		self.pack_end(self.size,False,False,0)
 		self.pack_end(self.ubuntu,False,False,0)
 		self.pack_end(self.underline,False,False,0)
 		self.pack_end(self.italic,False,False,0)
