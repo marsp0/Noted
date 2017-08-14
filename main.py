@@ -59,6 +59,7 @@ class MainWindow(Gtk.Window):
 	def delete_note(self,button):
 
 		item = self.sidebar.remove_item()
+		self.editor.set_text("")
 		if item != None:
 			del self.db[item]
 	

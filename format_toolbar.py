@@ -35,12 +35,34 @@ class FormatBar(Gtk.Box):
 		self.ubuntu = Gtk.ToggleButton.new_with_label("Ubuntu Mono")
 
 		#font size
-		self.size = Gtk.Entry()
-		self.size.set_text(str(12))
-		self.size.set_max_width_chars(4)
-		self.size.set_width_chars(4)
-		self.size.set_max_length(2)
+		#self.size = Gtk.Entry()
+		#self.size.set_text(str(12))
+		#self.size.set_max_width_chars(4)
+		#self.size.set_width_chars(4)
+		#self.size.set_max_length(2)
 
+
+		#justification
+		'''self.just_left = Gtk.ToggleButton()
+		image = Gtk.Image.new_from_icon_name("format-justify-left-symbolic",Gtk.IconSize.MENU)
+		image.show()
+		self.just_left.add(image)
+
+		self.just_center = Gtk.ToggleButton()
+		image = Gtk.Image.new_from_icon_name("format-justify-center-symbolic",Gtk.IconSize.MENU)
+		image.show()
+		self.just_center.add(image)
+
+		self.just_right = Gtk.ToggleButton()
+		image = Gtk.Image.new_from_icon_name("format-justify-right-symbolic",Gtk.IconSize.MENU)
+		image.show()
+		self.just_right.add(image)
+
+		self.just_fill = Gtk.ToggleButton()
+		image = Gtk.Image.new_from_icon_name("format-justify-fill-symbolic",Gtk.IconSize.MENU)
+		image.show()
+		self.just_fill.add(image)
+		'''
 
 		self.buttons = {}
 		self.buttons['bold'] = self.bold
@@ -50,7 +72,10 @@ class FormatBar(Gtk.Box):
 		#no need to add size as it is not being toggled
 		#self.buttons['size'] = self.size
 
-		self.pack_end(self.size,False,False,0)
+
+		#self.pack_end(self.just_left, False, False,0)
+		#self.pack_end(self.just_center, False, False,0)
+		#self.pack_end(self.just_right, False, False,0)
 		self.pack_end(self.ubuntu,False,False,0)
 		self.pack_end(self.underline,False,False,0)
 		self.pack_end(self.italic,False,False,0)

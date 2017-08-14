@@ -22,6 +22,7 @@ class Editor(Gtk.Grid):
 		self.textview.set_top_margin(5)
 		self.textview.set_left_margin(5)
 		self.textview.set_right_margin(5)
+		self.textview.modify_font(Pango.FontDescription.from_string("11"))
 		self.textbuffer = self.textview.get_buffer()
 		self.serialized_format = self.textbuffer.register_serialize_tagset()
 		self.deserialized_format = self.textbuffer.register_deserialize_tagset()
@@ -34,11 +35,13 @@ class Editor(Gtk.Grid):
 		self.tags['italic'] = self.textbuffer.create_tag("italic",style=Pango.Style.ITALIC)
 		self.tags['underline'] = self.textbuffer.create_tag("underline",underline=Pango.Underline.SINGLE)
 		self.tags['ubuntu'] = self.textbuffer.create_tag("ubuntu", family = "Ubuntu Mono")
-		for i in xrange(1,61):
-			self.tags[str(i)] = self.textbuffer.create_tag(str(i),font_desc=Pango.FontDescription.from_string(str(i)))
 
-		print self.tags
+		#Perhaps later on
+		#self.tags['just_left'] = self.textbuffer.create_tag("just_left", justification=Gtk.Justification(0))
+		#self.tags['just_center'] = self.textbuffer.create_tag("just_center", justification=Gtk.Justification(1))
+		#self.tags['just_right'] = self.textbuffer.create_tag("just_right", justification=Gtk.Justification(2))
 
+		#SIGNAL CONNECTIONS
 		self.textbuffer.connect_after("insert-text",self.insert_with_tags)
 
 		#TAGS
@@ -46,7 +49,6 @@ class Editor(Gtk.Grid):
 		self.tag_bar.set_placeholder_text("Tags")
 		self.tag_bar.set_hexpand(True)
 
-		self.counter = 1
 
 		#FORMAT TOOLBAR
 		self.format_toolbar = ft.FormatBar()
@@ -66,7 +68,6 @@ class Editor(Gtk.Grid):
 
 	def set_text(self,content):
 		self.textbuffer.set_text("")
-		print content
 		if content != "":
 			self.textbuffer.deserialize(self.textbuffer,self.deserialized_format,self.textbuffer.get_start_iter(),content)
 		else:
@@ -74,6 +75,7 @@ class Editor(Gtk.Grid):
 
 
 	def toggle_tag(self,widget,tag):
+
 		limits = self.textbuffer.get_selection_bounds()
 		to_apply = True
 		if len(limits) != 0:
@@ -93,6 +95,7 @@ class Editor(Gtk.Grid):
 		return self.textbuffer.get_text(self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter(),False)
 
 	def insert_with_tags(self,buffer,start_iter,data,data_len):
+
 		#for some reason it fucks up the formatting when doing the initial deserialization
 		#if we move back on a larger string
 		#NOTE : Figure out what is happening
@@ -103,11 +106,3 @@ class Editor(Gtk.Grid):
 		for tag in self.format_toolbar.buttons:
 			if self.format_toolbar.buttons[tag].get_active():
 				self.textbuffer.apply_tag(self.tags[tag],start_iter,end_iter)
-		font = int(self.format_toolbar.size.get_text())
-		if font < 1:
-			font = 1
-			self.format_toolbar.size.set_text("1")
-		elif font > 60:
-			font = 60
-			self.format_toolbar.size.set_text('60')
-		self.textbuffer.apply_tag(self.tags[str(font)],start_iter,end_iter)
