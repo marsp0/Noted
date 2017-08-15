@@ -35,11 +35,12 @@ class Editor(Gtk.Grid):
 		self.tags['italic'] = self.textbuffer.create_tag("italic",style=Pango.Style.ITALIC)
 		self.tags['underline'] = self.textbuffer.create_tag("underline",underline=Pango.Underline.SINGLE)
 		self.tags['ubuntu'] = self.textbuffer.create_tag("ubuntu", family = "Ubuntu Mono")
-
-		#Perhaps later on
-		#self.tags['just_left'] = self.textbuffer.create_tag("just_left", justification=Gtk.Justification(0))
-		#self.tags['just_center'] = self.textbuffer.create_tag("just_center", justification=Gtk.Justification(1))
-		#self.tags['just_right'] = self.textbuffer.create_tag("just_right", justification=Gtk.Justification(2))
+		self.tags['just_left'] = self.textbuffer.create_tag("just_left", justification=Gtk.Justification(0))
+		self.tags['just_center'] = self.textbuffer.create_tag("just_center", justification=Gtk.Justification(2))
+		self.tags['just_right'] = self.textbuffer.create_tag("just_right", justification=Gtk.Justification(1))
+		self.tags['just_fill'] = self.textbuffer.create_tag("just_fill",justification=Gtk.Justification(3))
+		self.tags['title'] = self.textbuffer.create_tag('title',font='25')
+		self.tags['header'] = self.textbuffer.create_tag('header',font='18')
 
 		#SIGNAL CONNECTIONS
 		self.textbuffer.connect_after("insert-text",self.insert_with_tags)
@@ -56,7 +57,12 @@ class Editor(Gtk.Grid):
 		self.format_toolbar.italic.connect("clicked",self.toggle_tag, 'italic')
 		self.format_toolbar.underline.connect("clicked",self.toggle_tag, 'underline')
 		self.format_toolbar.ubuntu.connect("clicked", self.toggle_tag,'ubuntu')
-
+		self.format_toolbar.just_right.connect('clicked',self.apply_tag,'just_right')
+		self.format_toolbar.just_left.connect('clicked',self.apply_tag,'just_left')
+		self.format_toolbar.just_center.connect('clicked',self.apply_tag,'just_center')
+		self.format_toolbar.just_fill.connect('clicked',self.apply_tag,'just_fill')
+		self.format_toolbar.title.connect('clicked',self.apply_tag,'title')
+		self.format_toolbar.header.connect('clicked',self.apply_tag,'header')
 
 		self.attach(self.scrolled_window,0,0,2,1)
 		self.attach(self.tag_bar,0,1,1,1)
@@ -83,6 +89,12 @@ class Editor(Gtk.Grid):
 				self.textbuffer.apply_tag(self.tags[tag],start,end)
 			else:
 				self.textbuffer.remove_tag(self.tags[tag],start,end)
+
+	def apply_tag(self,widget,tag):
+		limits = self.textbuffer.get_selection_bounds()
+		if len(limits) != 0:
+			start,end = limits
+			self.textbuffer.apply_tag(self.tags[tag],start,end)
 
 	def get_clean_text(self):
 

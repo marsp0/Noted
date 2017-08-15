@@ -54,6 +54,7 @@ class MainWindow(Gtk.Window):
 		self.add(main_window)
 
 	def create_notebook(self,button):
+		#creates a new notebook
 		dialog = nd.NameDialog(self)
 		response = dialog.run()
 		if response == Gtk.ResponseType.OK:
@@ -67,8 +68,7 @@ class MainWindow(Gtk.Window):
 		if self.sidebar.add_item("New Note", self.id):
 			self.editor.set_text("")
 			note_item = note.Note("New Note", "", [])
-			parent_iter = self.sidebar.get_selected()
-			parent_id = self.sidebar.get_id(parent_iter)
+			parent_id = self.sidebar.get_id(self.sidebar.get_selected())
 			self.db[parent_id]['notes'][self.id] = note_item
 			self.id += 1
 
@@ -83,15 +83,18 @@ class MainWindow(Gtk.Window):
 			else:
 				del self.db[parent_id]
 
-	def show_note(self,tree_view,path,col):
+	def show_note(self,treeview,path,col):
 		if len(path) > 1:
-			parent_iter = self.sidebar.get_parent(self.sidebar.get_iter_from_path(path))
+			parent_iter = self.sidebar.get_parent(treeview.get_selection().get_selected()[1])
 			parent_id = self.sidebar.get_id(parent_iter)
 			note_id = self.sidebar.get_id(path)
 			self.editor.set_text(self.db[parent_id]['notes'][note_id].get_content())
+		else:
+			self.editor.set_text("")
 
 	def save_note(self,event):
 		path =  self.sidebar.get_selected()
+		#check if something was selected and that it was not a notebook
 		if path != None and len(self.sidebar.get_path(path).to_string()) > 1:
 			clean_text = self.editor.get_clean_text()
 			if clean_text != "":
