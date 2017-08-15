@@ -8,6 +8,7 @@ import headerbar as hb
 import editor
 import note
 import shelve
+import notebook_dialog as nd
 
 
 class MainWindow(Gtk.Window):
@@ -44,6 +45,7 @@ class MainWindow(Gtk.Window):
 		#EDITOR
 		self.editor = editor.Editor()
 
+		#loads the storage file and creates the dict db
 		self.start_database()
 		
 
@@ -52,18 +54,23 @@ class MainWindow(Gtk.Window):
 		self.add(main_window)
 
 	def create_notebook(self,button):
-		self.sidebar.create_notebook("New Notebook",self.notebook_id)
-		self.db[self.notebook_id] = {"name" : "New Notebook", "notes" : {}}
-		self.notebook_id += 1
+		dialog = nd.NameDialog(self)
+		response = dialog.run()
+		if response == Gtk.ResponseType.OK:
+			name = dialog.entry.get_text()
+			self.sidebar.add_notebook(name,self.notebook_id)
+			self.db[self.notebook_id] = {"name" : name, "notes" : {}}
+			self.notebook_id += 1
+		dialog.destroy()
 	
 	def create_note(self,button):
-		self.sidebar.add_item("New Note", self.id)
-		self.editor.set_text("")
-		note_item = note.Note("New Note", "", [])
-		parent_iter = self.sidebar.get_selected()
-		parent_id = self.sidebar.get_id(parent_iter)
-		self.db[parent_id]['notes'][self.id] = note_item
-		self.id += 1
+		if self.sidebar.add_item("New Note", self.id):
+			self.editor.set_text("")
+			note_item = note.Note("New Note", "", [])
+			parent_iter = self.sidebar.get_selected()
+			parent_id = self.sidebar.get_id(parent_iter)
+			self.db[parent_id]['notes'][self.id] = note_item
+			self.id += 1
 
 	def delete_note(self,button):
 
@@ -75,36 +82,8 @@ class MainWindow(Gtk.Window):
 				del self.db[parent_id]['notes'][note_id]
 			else:
 				del self.db[parent_id]
-	
-	def start_database(self):
-
-		db = shelve.open("database.db")
-		if not db:
-			self.db = {}
-			self.id = 0
-			self.notebook_id = 0
-		else:
-			self.db = db['notes']
-			self.id = db['note_id']
-			self.notebook_id = db['notebook_id']
-
-		for item in self.db:
-			notebook_iter = self.sidebar.create_notebook(self.db[item]['name'],item)
-			for note_item in self.db[item]['notes']:
-				self.sidebar.add_item(self.db[item]['notes'][note_item].get_title(),note_item,notebook_iter)
-		db.close()
-
-	def close_database(self,event):
-		db = shelve.open('database.db')
-		db['notes'] = self.db
-		db['note_id'] = self.id
-		db['notebook_id'] = self.notebook_id
-		db.close()
-		self.hide()
-		Gtk.main_quit()
 
 	def show_note(self,tree_view,path,col):
-		print self.db
 		if len(path) > 1:
 			parent_iter = self.sidebar.get_parent(self.sidebar.get_iter_from_path(path))
 			parent_id = self.sidebar.get_id(parent_iter)
@@ -128,6 +107,33 @@ class MainWindow(Gtk.Window):
 			note_id = self.sidebar.get_id(path)
 			self.db[parent_id]['notes'][note_id] = note_item
 			self.sidebar.modify_item(path,title)
+
+	def start_database(self):
+
+		db = shelve.open("database.db")
+		if not db:
+			self.db = {}
+			self.id = 0
+			self.notebook_id = 0
+		else:
+			self.db = db['notes']
+			self.id = db['note_id']
+			self.notebook_id = db['notebook_id']
+
+		for item in self.db:
+			notebook_iter = self.sidebar.add_notebook(self.db[item]['name'],item)
+			for note_item in self.db[item]['notes']:
+				self.sidebar.add_item(self.db[item]['notes'][note_item].get_title(),note_item,notebook_iter)
+		db.close()
+
+	def close_database(self,event):
+		db = shelve.open('database.db')
+		db['notes'] = self.db
+		db['note_id'] = self.id
+		db['notebook_id'] = self.notebook_id
+		db.close()
+		self.hide()
+		Gtk.main_quit()
 
 
 	def get_title(self,content):

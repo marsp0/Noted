@@ -13,12 +13,12 @@ class Headerbar(Gtk.HeaderBar):
 		self.set_show_close_button(True)
 		self.props.title =  "Noted"
 
-		box = Gtk.HBox()
+		box = Gtk.HBox(spacing=10)
 		Gtk.StyleContext.add_class(box.get_style_context(), "linked")
 
 		#Create Button
 		self.create_button = Gtk.Button()
-		self.create_button.props.relief = Gtk.ReliefStyle(0)
+		self.create_button.props.relief = Gtk.ReliefStyle(2)
 		image = Gtk.Image.new_from_icon_name("document-new", Gtk.IconSize.LARGE_TOOLBAR)
 		image.set_tooltip_text("New Note")
 		image.show()
@@ -27,7 +27,7 @@ class Headerbar(Gtk.HeaderBar):
 
 		#New Notebook Button
 		self.notebook_button = Gtk.Button()
-		self.notebook_button.props.relief = Gtk.ReliefStyle(0)
+		self.notebook_button.props.relief = Gtk.ReliefStyle(2)
 
 		image = Gtk.Image.new_from_icon_name("folder-new",Gtk.IconSize.LARGE_TOOLBAR)
 		image.set_tooltip_text("New Notebook")
@@ -37,7 +37,7 @@ class Headerbar(Gtk.HeaderBar):
 
 		#save button
 		self.save_button = Gtk.Button()
-		self.save_button.props.relief = Gtk.ReliefStyle(0)
+		self.save_button.props.relief = Gtk.ReliefStyle(2)
 
 		image = Gtk.Image.new_from_icon_name("document-save", Gtk.IconSize.LARGE_TOOLBAR)
 		image.set_tooltip_text("Save Note")
@@ -47,7 +47,7 @@ class Headerbar(Gtk.HeaderBar):
 
 		#Delete Button
 		self.delete_button = Gtk.Button()
-		self.delete_button.props.relief = Gtk.ReliefStyle(0)
+		self.delete_button.props.relief = Gtk.ReliefStyle(2)
 		image = Gtk.Image.new_from_icon_name("edit-delete", Gtk.IconSize.LARGE_TOOLBAR)
 		image.set_tooltip_text("Delete Note")
 		image.show()

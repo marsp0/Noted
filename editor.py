@@ -46,7 +46,7 @@ class Editor(Gtk.Grid):
 
 		#TAGS
 		self.tag_bar = Gtk.Entry()
-		self.tag_bar.set_placeholder_text("Tags")
+		self.tag_bar.set_placeholder_text("Not Implemented")
 		self.tag_bar.set_hexpand(True)
 
 
