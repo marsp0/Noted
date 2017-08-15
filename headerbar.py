@@ -25,6 +25,16 @@ class Headerbar(Gtk.HeaderBar):
 		self.create_button.add(image)
 		box.add(self.create_button)
 
+		#New Notebook Button
+		self.notebook_button = Gtk.Button()
+		self.notebook_button.props.relief = Gtk.ReliefStyle(0)
+
+		image = Gtk.Image.new_from_icon_name("folder-new",Gtk.IconSize.LARGE_TOOLBAR)
+		image.set_tooltip_text("New Notebook")
+		image.show()
+		self.notebook_button.add(image)
+		box.add(self.notebook_button)
+
 		#save button
 		self.save_button = Gtk.Button()
 		self.save_button.props.relief = Gtk.ReliefStyle(0)

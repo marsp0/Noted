@@ -77,18 +77,12 @@ class Editor(Gtk.Grid):
 	def toggle_tag(self,widget,tag):
 
 		limits = self.textbuffer.get_selection_bounds()
-		to_apply = True
 		if len(limits) != 0:
 			start,end = limits
-			tag_list = start.get_tags()
-			if len(tag_list) != 0:
-				for item in tag_list:
-					if item.props.name == tag and self.format_toolbar.buttons[tag].get_active() == False:
-						self.textbuffer.remove_tag(self.tags[tag],start,end)
-						to_apply = False
-			if to_apply:
+			if self.format_toolbar.buttons[tag].get_active():
 				self.textbuffer.apply_tag(self.tags[tag],start,end)
-
+			else:
+				self.textbuffer.remove_tag(self.tags[tag],start,end)
 
 	def get_clean_text(self):
 

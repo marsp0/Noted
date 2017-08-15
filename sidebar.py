@@ -14,7 +14,7 @@ class Sidebar(Gtk.VBox):
 		self.set_homogeneous(False)
 
 		#TreeStore
-		self.store = Gtk.ListStore(str,int)
+		self.store = Gtk.TreeStore(str,int)
 
 		#Renderer
 		self.renderer = Gtk.CellRendererText()
@@ -32,9 +32,18 @@ class Sidebar(Gtk.VBox):
 		self.scrolled_window.add(self.view)
 		self.add(self.scrolled_window)
 
-	def add_item(self,title,note_id):
+	def add_item(self,title,note_id,notebook_iter=None):
+		if notebook_iter == None:
+			parent_iter = self.get_selected()
+			if parent_iter != None:
+				if self.store.iter_depth(parent_iter) != 0:
+					parent_iter = self.store.iter_parent(parent_iter)
+				self.store.append(parent_iter,[title,note_id])
 
-		self.store.append([title,note_id])
+		else:
+			if self.store.iter_depth(notebook_iter) == 0:
+				self.store.append(notebook_iter,[title,note_id])
+
 
 	def modify_item(self,path,title):
 
@@ -43,16 +52,35 @@ class Sidebar(Gtk.VBox):
 
 	def remove_item(self):
 
-		item =  self.view.get_selection().get_selected()[1]
+		item =  self.get_selected()
 		if item != None:
-			to_return = self.store[item][1]
+			if len(self.store.get_path(item).to_string()) > 1:
+				note_id = self.store[item][1]
+				parent_iter = self.store.iter_parent(item)
+				parent_id = self.get_id(parent_iter)
+			else:
+				parent_id = self.store[item][1]
+				note_id = None
 			self.store.remove(item)
-			return to_return
+			return note_id,parent_id
 
-	def get_item(self,path):
+	def get_id(self,path):
 
 		return self.store[path][1]
 
 	def get_selected(self):
 		
 		return self.view.get_selection().get_selected()[1]
+
+	def create_notebook(self, name, notebook_id):
+		notebook_iter = self.store.append(None,[name,notebook_id])
+		return notebook_iter
+
+	def get_path(self,iter_node):
+		return self.store.get_path(iter_node)
+
+	def get_parent(self,iter_node):
+		return self.store.iter_parent(iter_node)
+
+	def get_iter_from_path(self,path):
+		return self.store.get_iter(path)
