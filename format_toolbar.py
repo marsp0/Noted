@@ -66,12 +66,20 @@ class FormatBar(Gtk.Box):
 		image.show()
 		self.just_fill.add(image)
 		self.just_fill.set_tooltip_text("Fill Justification (Select the entire line)")
+
+		self.image = Gtk.Button()
+		image = Gtk.Image.new_from_icon_name("multimedia-photo-manager",Gtk.IconSize.MENU)
+		image.show()
+		self.image.add(image)
+		self.image.set_tooltip_text("Add an image")
 		
 
 
-		self.title = Gtk.Button.new_with_label("Title")
+		self.title = Gtk.Button.new_with_label("T")
+		self.title.set_tooltip_text("Title")
 
-		self.header = Gtk.Button.new_with_label("Header")
+		self.header = Gtk.Button.new_with_label("H")
+		self.header.set_tooltip_text("Header")
 
 		self.buttons = {}
 		self.buttons['bold'] = self.bold
@@ -84,13 +92,15 @@ class FormatBar(Gtk.Box):
 		#self.buttons['just_fill'] = self.just_fill
 		#self.buttons['size'] = self.size
 
-		self.pack_end(self.header,False,False,0)
-		self.pack_end(self.title,False,False,0)
+
 		self.pack_end(self.just_fill,False,False,0)
 		self.pack_end(self.just_right, False, False,0)
 		self.pack_end(self.just_center, False, False,0)
 		self.pack_end(self.just_left, False, False,0)
 		self.pack_end(self.ubuntu,False,False,0)
+		self.pack_end(self.image,False,False,0)
+		self.pack_end(self.header,False,False,0)
+		self.pack_end(self.title,False,False,0)
 		self.pack_end(self.underline,False,False,0)
 		self.pack_end(self.italic,False,False,0)
 		self.pack_end(self.bold,False,False,0)

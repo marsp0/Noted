@@ -1,7 +1,7 @@
 import gi
 gi.require_version('Gtk', '3.0')
 #gi.require_version('Granite', '1.0')
-from gi.repository import Gtk,Gdk, Pango
+from gi.repository import Gtk,Gdk, Pango, GdkPixbuf
 import format_toolbar as ft
 
 class Editor(Gtk.Grid):
@@ -63,6 +63,7 @@ class Editor(Gtk.Grid):
 		self.format_toolbar.just_fill.connect('clicked',self.apply_tag,'just_fill')
 		self.format_toolbar.title.connect('clicked',self.apply_tag,'title')
 		self.format_toolbar.header.connect('clicked',self.apply_tag,'header')
+		self.format_toolbar.image.connect("clicked", self.add_image)
 
 		self.attach(self.scrolled_window,0,0,2,1)
 		self.attach(self.tag_bar,0,1,1,1)
@@ -112,3 +113,34 @@ class Editor(Gtk.Grid):
 		for tag in self.format_toolbar.buttons:
 			if self.format_toolbar.buttons[tag].get_active():
 				self.textbuffer.apply_tag(self.tags[tag],start_iter,end_iter)
+
+	def add_image(self,widget):
+		dialog = Gtk.FileChooserDialog("Pick a file", None,
+                                            Gtk.FileChooserAction.OPEN,
+                                           (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                            Gtk.STOCK_OPEN, Gtk.ResponseType.ACCEPT))
+
+		image_filter = Gtk.FileFilter()
+		image_filter.set_name("Image files")
+		image_filter.add_mime_type("image/*")
+
+		dialog.add_filter(image_filter)
+
+		response = dialog.run()
+		if response == Gtk.ResponseType.ACCEPT:
+			image_path =  dialog.get_file().get_path()
+			image = GdkPixbuf.Pixbuf.new_from_file(image_path)
+			image_format,width,height = GdkPixbuf.Pixbuf.get_file_info(image_path)
+			if width > 610:
+				width = 610
+			if height > 400:
+				height = 400
+			if width > 610 and height > 400:
+				width = 610
+				height = 400
+			image = image.scale_simple(width,height,GdkPixbuf.InterpType.BILINEAR)
+			current_position = self.textbuffer.props.cursor_position
+			cursor_iter = self.textbuffer.get_iter_at_offset(current_position)
+			self.textbuffer.insert_pixbuf(cursor_iter,image)
+
+		dialog.destroy()
