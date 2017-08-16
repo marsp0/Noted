@@ -22,6 +22,7 @@ class Sidebar(Gtk.VBox):
 		#TreeView
 		self.view = Gtk.TreeView(self.store)
 		self.view.set_headers_visible(False)
+		#F6F6F5 - grey sidebar
 		self.view.modify_bg(Gtk.StateType.NORMAL,Gdk.Color.parse('#F6F6F5')[1])
 		self.view.modify_bg(Gtk.StateType.SELECTED, Gdk.Color.parse('#2980b9')[1])
 		self.view.modify_fg(Gtk.StateType.SELECTED, Gdk.Color.parse('#ffffff')[1])

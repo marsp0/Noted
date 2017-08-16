@@ -8,7 +8,8 @@ import headerbar as hb
 import editor
 import note
 import shelve
-import notebook_dialog as nd
+from dialogs import notebook_dialog as nd
+from dialogs import delete_dialog as dd
 
 
 class MainWindow(Gtk.Window):
@@ -16,8 +17,8 @@ class MainWindow(Gtk.Window):
 	def __init__(self):
 		Gtk.Window.__init__(self, title="Noted")
 		self.set_border_width(5)
-		self.set_size_request(1000, 800)
-		
+		self.set_size_request(1200, 1000)
+		self.set_resizable(False)
 		#Header Bar
 		hbar = hb.Headerbar()
 		hbar.connect("destroy",self.close_database)
@@ -73,15 +74,18 @@ class MainWindow(Gtk.Window):
 			self.id += 1
 
 	def delete_note(self,button):
-
-		result = self.sidebar.remove_item()
-		self.editor.set_text("")
-		if result != None:
-			note_id, parent_id = result
-			if note_id != None:
-				del self.db[parent_id]['notes'][note_id]
-			else:
-				del self.db[parent_id]
+		dialog = dd.DeleteDialog(self)
+		response = dialog.run()
+		if response == Gtk.ResponseType.OK:
+			result = self.sidebar.remove_item()
+			self.editor.set_text("")
+			if result != None:
+				note_id, parent_id = result
+				if note_id != None:
+					del self.db[parent_id]['notes'][note_id]
+				else:
+					del self.db[parent_id]
+		dialog.destroy()
 
 	def show_note(self,treeview,path,col):
 		if len(path) > 1:
@@ -91,6 +95,11 @@ class MainWindow(Gtk.Window):
 			self.editor.set_text(self.db[parent_id]['notes'][note_id].get_content())
 		else:
 			self.editor.set_text("")
+			if treeview.row_expanded(path) == False:
+				treeview.expand_row(path,True)
+			else:
+				treeview.collapse_row(path)
+
 
 	def save_note(self,event):
 		path =  self.sidebar.get_selected()

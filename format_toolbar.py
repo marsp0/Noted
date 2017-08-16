@@ -93,14 +93,24 @@ class FormatBar(Gtk.Box):
 		#self.buttons['size'] = self.size
 
 
-		self.pack_end(self.just_fill,False,False,0)
-		self.pack_end(self.just_right, False, False,0)
-		self.pack_end(self.just_center, False, False,0)
-		self.pack_end(self.just_left, False, False,0)
-		self.pack_end(self.ubuntu,False,False,0)
-		self.pack_end(self.image,False,False,0)
-		self.pack_end(self.header,False,False,0)
-		self.pack_end(self.title,False,False,0)
-		self.pack_end(self.underline,False,False,0)
-		self.pack_end(self.italic,False,False,0)
-		self.pack_end(self.bold,False,False,0)
+		self.pack_start(self.bold,False,False,0)
+		self.pack_start(self.italic,False,False,0)
+		self.pack_start(self.underline,False,False,0)
+		self.pack_start(self.title,False,False,0)
+		self.pack_start(self.header,False,False,0)
+		self.pack_start(self.image,False,False,0)
+		self.pack_start(self.ubuntu,False,False,0)
+		self.pack_start(self.just_left, False, False,0)
+		self.pack_start(self.just_center, False, False,0)
+		self.pack_start(self.just_right, False, False,0)
+		self.pack_start(self.just_fill,False,False,0)
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		

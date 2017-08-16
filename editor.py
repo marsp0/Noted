@@ -65,9 +65,9 @@ class Editor(Gtk.Grid):
 		self.format_toolbar.header.connect('clicked',self.apply_tag,'header')
 		self.format_toolbar.image.connect("clicked", self.add_image)
 
-		self.attach(self.scrolled_window,0,0,2,1)
-		self.attach(self.tag_bar,0,1,1,1)
-		self.attach(self.format_toolbar,1,1,1,1)
+		self.attach(self.scrolled_window,0,1,2,1)
+		#self.attach(self.tag_bar,0,0,1,1)
+		self.attach(self.format_toolbar,0,0,2,1)
 
 	def get_text(self):
 
@@ -131,13 +131,13 @@ class Editor(Gtk.Grid):
 			image_path =  dialog.get_file().get_path()
 			image = GdkPixbuf.Pixbuf.new_from_file(image_path)
 			image_format,width,height = GdkPixbuf.Pixbuf.get_file_info(image_path)
-			if width > 610:
-				width = 610
-			if height > 400:
-				height = 400
-			if width > 610 and height > 400:
-				width = 610
-				height = 400
+			if width > 800:
+				width = 800
+			if height > 640:
+				height = 640
+			if width > 800 and height > 640:
+				width = 800
+				height = 640
 			image = image.scale_simple(width,height,GdkPixbuf.InterpType.BILINEAR)
 			current_position = self.textbuffer.props.cursor_position
 			cursor_iter = self.textbuffer.get_iter_at_offset(current_position)
