@@ -72,8 +72,11 @@ class FormatBar(Gtk.Box):
 		image.show()
 		self.image.add(image)
 		self.image.set_tooltip_text("Add an image")
-		
 
+		self.send_feedback = Gtk.Button.new_with_label('Feedback')
+		self.send_feedback.set_tooltip_text("Send Feedback")
+		self.send_feedback.props.relief = Gtk.ReliefStyle(2)
+		
 
 		self.title = Gtk.Button.new_with_label("T")
 		self.title.set_tooltip_text("Title")
@@ -91,6 +94,8 @@ class FormatBar(Gtk.Box):
 		#self.buttons['just_center'] = self.just_center
 		#self.buttons['just_fill'] = self.just_fill
 		#self.buttons['size'] = self.size
+
+		self.pack_end(self.send_feedback,False,False,0)
 
 
 		self.pack_start(self.bold,False,False,0)

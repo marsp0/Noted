@@ -3,6 +3,7 @@ gi.require_version('Gtk', '3.0')
 #gi.require_version('Granite', '1.0')
 from gi.repository import Gtk,Gdk, Pango, GdkPixbuf
 import format_toolbar as ft
+import subprocess
 
 class Editor(Gtk.Grid):
 
@@ -39,7 +40,7 @@ class Editor(Gtk.Grid):
 		self.tags['just_center'] = self.textbuffer.create_tag("just_center", justification=Gtk.Justification(2))
 		self.tags['just_right'] = self.textbuffer.create_tag("just_right", justification=Gtk.Justification(1))
 		self.tags['just_fill'] = self.textbuffer.create_tag("just_fill",justification=Gtk.Justification(3))
-		self.tags['title'] = self.textbuffer.create_tag('title',font='25')
+		self.tags['title'] = self.textbuffer.create_tag('title',font='Open Sans 25')
 		self.tags['header'] = self.textbuffer.create_tag('header',font='18')
 
 		#SIGNAL CONNECTIONS
@@ -64,6 +65,7 @@ class Editor(Gtk.Grid):
 		self.format_toolbar.title.connect('clicked',self.apply_tag,'title')
 		self.format_toolbar.header.connect('clicked',self.apply_tag,'header')
 		self.format_toolbar.image.connect("clicked", self.add_image)
+		self.format_toolbar.send_feedback.connect("clicked",self.send_feedback)
 
 		self.attach(self.scrolled_window,0,1,2,1)
 		#self.attach(self.tag_bar,0,0,1,1)
@@ -144,3 +146,9 @@ class Editor(Gtk.Grid):
 			self.textbuffer.insert_pixbuf(cursor_iter,image)
 
 		dialog.destroy()
+
+	def send_feedback(self,widget):
+		try:
+			result = subprocess.call(["pantheon-mails", "mailto:notedfeedback@gmail.com"])
+		except OSError:
+			pass

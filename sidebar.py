@@ -11,7 +11,7 @@ class Sidebar(Gtk.VBox):
 		self.set_size_request(200,400)
 		self.scrolled_window = Gtk.ScrolledWindow()
 
-		self.set_homogeneous(False)
+		self.set_homogeneous(True)
 
 		#TreeStore
 		self.store = Gtk.TreeStore(str,int)
