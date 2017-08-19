@@ -17,7 +17,7 @@ class MainWindow(Gtk.Window):
 	def __init__(self):
 		Gtk.Window.__init__(self, title="Noted")
 		self.set_border_width(5)
-		self.set_size_request(1200, 1000)
+		self.set_size_request(1100, 900)
 		self.set_resizable(False)
 		#Header Bar
 		hbar = hb.Headerbar()
@@ -60,9 +60,10 @@ class MainWindow(Gtk.Window):
 		response = dialog.run()
 		if response == Gtk.ResponseType.OK:
 			name = dialog.entry.get_text()
-			self.sidebar.add_notebook(name,self.notebook_id)
-			self.db[self.notebook_id] = {"name" : name, "notes" : {}}
-			self.notebook_id += 1
+			if name != '':
+				self.sidebar.add_notebook(name,self.notebook_id)
+				self.db[self.notebook_id] = {"name" : name, "notes" : {}}
+				self.notebook_id += 1
 		dialog.destroy()
 	
 	def create_note(self,button):

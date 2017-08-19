@@ -40,8 +40,8 @@ class Editor(Gtk.Grid):
 		self.tags['just_center'] = self.textbuffer.create_tag("just_center", justification=Gtk.Justification(2))
 		self.tags['just_right'] = self.textbuffer.create_tag("just_right", justification=Gtk.Justification(1))
 		self.tags['just_fill'] = self.textbuffer.create_tag("just_fill",justification=Gtk.Justification(3))
-		self.tags['title'] = self.textbuffer.create_tag('title',font='Open Sans 25')
-		self.tags['header'] = self.textbuffer.create_tag('header',font='18')
+		self.tags['title'] = self.textbuffer.create_tag('title',font='20')
+		self.tags['header'] = self.textbuffer.create_tag('header',font='15')
 
 		#SIGNAL CONNECTIONS
 		self.textbuffer.connect_after("insert-text",self.insert_with_tags)
@@ -67,13 +67,17 @@ class Editor(Gtk.Grid):
 		self.format_toolbar.image.connect("clicked", self.add_image)
 		self.format_toolbar.send_feedback.connect("clicked",self.send_feedback)
 
-		self.attach(self.scrolled_window,0,1,2,1)
+		self.attach(self.scrolled_window,0,0,2,1)
 		#self.attach(self.tag_bar,0,0,1,1)
-		self.attach(self.format_toolbar,0,0,2,1)
+		self.attach(self.format_toolbar,0,1,2,1)
 
 	def get_text(self):
 
 		return self.textbuffer.serialize(self.textbuffer,self.serialized_format,self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter())
+
+	def get_clean_text(self):
+
+		return self.textbuffer.get_text(self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter(),False)
 
 	def set_text(self,content):
 		self.textbuffer.set_text("")
@@ -97,11 +101,27 @@ class Editor(Gtk.Grid):
 		limits = self.textbuffer.get_selection_bounds()
 		if len(limits) != 0:
 			start,end = limits
+			if tag == 'header':
+				self.textbuffer.remove_tag(self.tags['title'],start,end)
+			elif tag == 'title':
+				self.textbuffer.remove_tag(self.tags['header'],start,end)
+			elif tag == 'just_left':
+				self.textbuffer.remove_tag(self.tags['just_right'],start,end)
+				self.textbuffer.remove_tag(self.tags['just_center'],start,end)
+				self.textbuffer.remove_tag(self.tags['just_fill'],start,end)
+			elif tag == 'just_right':
+				self.textbuffer.remove_tag(self.tags['just_left'],start,end)
+				self.textbuffer.remove_tag(self.tags['just_center'],start,end)
+				self.textbuffer.remove_tag(self.tags['just_fill'],start,end)
+			elif tag == 'just_center':
+				self.textbuffer.remove_tag(self.tags['just_right'],start,end)
+				self.textbuffer.remove_tag(self.tags['just_left'],start,end)
+				self.textbuffer.remove_tag(self.tags['just_fill'],start,end)
+			elif tag == 'just_fill':
+				self.textbuffer.remove_tag(self.tags['just_right'],start,end)
+				self.textbuffer.remove_tag(self.tags['just_center'],start,end)
+				self.textbuffer.remove_tag(self.tags['just_left'],start,end)
 			self.textbuffer.apply_tag(self.tags[tag],start,end)
-
-	def get_clean_text(self):
-
-		return self.textbuffer.get_text(self.textbuffer.get_start_iter(),self.textbuffer.get_end_iter(),False)
 
 	def insert_with_tags(self,buffer,start_iter,data,data_len):
 
@@ -149,6 +169,6 @@ class Editor(Gtk.Grid):
 
 	def send_feedback(self,widget):
 		try:
-			result = subprocess.call(["pantheon-mails", "mailto:notedfeedback@gmail.com"])
+			result = subprocess.call(["pantheon-mail", "mailto:notedfeedback@gmail.com"])
 		except OSError:
 			pass

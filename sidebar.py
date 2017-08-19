@@ -8,7 +8,7 @@ class Sidebar(Gtk.VBox):
 	def __init__(self):
 
 		Gtk.VBox.__init__(self,False,0)
-		self.set_size_request(200,400)
+		self.set_size_request(200,600)
 		self.scrolled_window = Gtk.ScrolledWindow()
 
 		self.set_homogeneous(True)
