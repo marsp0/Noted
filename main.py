@@ -1,8 +1,6 @@
 import gi
 gi.require_version('Gtk', '3.0')
-#gi.require_version('Granite', '1.0')
-from gi.repository import Gtk,Gdk
-import format_toolbar as ft
+from gi.repository import Gtk
 import sidebar as sb
 import headerbar as hb
 import editor
@@ -10,160 +8,167 @@ import note
 import shelve
 from dialogs import notebook_dialog as nd
 from dialogs import delete_dialog as dd
+from database import Database
 
 
 class MainWindow(Gtk.Window):
 
-	def __init__(self):
-		Gtk.Window.__init__(self, title="Noted")
-		self.set_border_width(5)
-		self.set_size_request(1100, 900)
-		self.set_resizable(False)
-		#Header Bar
-		hbar = hb.Headerbar()
-		hbar.connect("destroy",self.close_database)
-		self.set_titlebar(hbar)
+    def __init__(self):
+        Gtk.Window.__init__(self, title="Noted")
+        self.set_border_width(5)
+        self.set_size_request(1100, 900)
+        self.set_resizable(False)
+        # Header Bar
+        hbar = hb.Headerbar()
+        hbar.connect("destroy", self.close_database)
+        self.set_titlebar(hbar)
 
-		#Notebook button
-		hbar.notebook_button.connect("clicked",self.create_notebook)
-		
-		#Create Button
-		hbar.create_button.connect("clicked",self.create_note)
+        # Notebook button
+        hbar.notebook_button.connect("clicked", self.create_notebook)
 
-		#Save button
-		hbar.save_button.connect("clicked",self.save_note)
+        # Create Button
+        hbar.create_button.connect("clicked", self.create_note)
 
-		#Delete Button
-		hbar.delete_button.connect("clicked",self.delete_note)
+        # Save button
+        hbar.save_button.connect("clicked", self.save_note)
 
-		# MAIN WINDOW
-		main_window = Gtk.Grid(column_homogeneous=False, column_spacing=5)
+        # Delete Button
+        hbar.delete_button.connect("clicked", self.delete_note)
 
-		#SIDEBAR
-		self.sidebar = sb.Sidebar()
-		self.sidebar.view.connect("row_activated",self.show_note)
+        # MAIN WINDOW
+        main_window = Gtk.Grid(column_homogeneous=False, column_spacing=5)
 
-		#EDITOR
-		self.editor = editor.Editor()
+        # SIDEBAR
+        self.sidebar = sb.Sidebar()
+        self.sidebar.view.connect("row_activated", self.show_note)
 
-		#loads the storage file and creates the dict db
-		self.start_database()
-		
+        # EDITOR
+        self.editor = editor.Editor()
 
-		main_window.attach(self.sidebar,0,0,1,2)
-		main_window.attach(self.editor, 1, 0, 2, 1)
-		self.add(main_window)
+        # loads the storage file and creates the dict db
+        self.start_database()
 
-	def create_notebook(self,button):
-		#creates a new notebook
-		dialog = nd.NameDialog(self)
-		response = dialog.run()
-		if response == Gtk.ResponseType.OK:
-			name = dialog.entry.get_text()
-			if name != '':
-				self.sidebar.add_notebook(name,self.notebook_id)
-				self.db[self.notebook_id] = {"name" : name, "notes" : {}}
-				self.notebook_id += 1
-		dialog.destroy()
-	
-	def create_note(self,button):
-		if self.sidebar.add_item("New Note", self.id):
-			self.editor.set_text("")
-			note_item = note.Note("New Note", "", [])
-			parent_id = self.sidebar.get_id(self.sidebar.get_selected())
-			self.db[parent_id]['notes'][self.id] = note_item
-			self.id += 1
+        main_window.attach(self.sidebar, 0, 0, 1, 2)
+        main_window.attach(self.editor, 1, 0, 2, 1)
+        self.add(main_window)
 
-	def delete_note(self,button):
-		dialog = dd.DeleteDialog(self)
-		response = dialog.run()
-		if response == Gtk.ResponseType.OK:
-			result = self.sidebar.remove_item()
-			self.editor.set_text("")
-			if result != None:
-				note_id, parent_id = result
-				if note_id != None:
-					del self.db[parent_id]['notes'][note_id]
-				else:
-					del self.db[parent_id]
-		dialog.destroy()
+    def create_notebook(self, button):
+        # creates a new notebook
+        dialog = nd.NameDialog(self)
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            name = dialog.entry.get_text()
+            if name != '':
+                self.sidebar.add_notebook(name, self.notebook_id)
+                self.db[self.notebook_id] = {"name": name, "notes": {}}
+                self.notebook_id += 1
+        dialog.destroy()
 
-	def show_note(self,treeview,path,col):
-		if len(path) > 1:
-			parent_iter = self.sidebar.get_parent(treeview.get_selection().get_selected()[1])
-			parent_id = self.sidebar.get_id(parent_iter)
-			note_id = self.sidebar.get_id(path)
-			self.editor.set_text(self.db[parent_id]['notes'][note_id].get_content())
-		else:
-			self.editor.set_text("")
-			if treeview.row_expanded(path) == False:
-				treeview.expand_row(path,True)
-			else:
-				treeview.collapse_row(path)
+    def create_note(self, button):
+        if self.sidebar.add_item("New Note", self.id):
+            self.editor.set_text("")
+            note_item = note.Note("New Note", "", [])
+            parent_id = self.sidebar.get_id(self.sidebar.get_selected())
+            self.db[parent_id]['notes'][self.id] = note_item
+            self.id += 1
 
+    def delete_note(self, button):
+        dialog = dd.DeleteDialog(self)
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            print 'ds'
+            result = self.sidebar.remove_item()
+            print result
+            self.editor.set_text("")
+            if result is not None:
+                note_id, parent_id = result
+                if note_id is not None:
+                    del self.db[parent_id]['notes'][note_id]
+                else:
+                    del self.db[parent_id]
+        dialog.destroy()
 
-	def save_note(self,event):
-		path =  self.sidebar.get_selected()
-		#check if something was selected and that it was not a notebook
-		if path != None and len(self.sidebar.get_path(path).to_string()) > 1:
-			clean_text = self.editor.get_clean_text()
-			if clean_text != "":
-				title = self.get_title(clean_text)
-				
-			else:
-				title = "New Note"
+    def show_note(self, treeview, path, col):
+        if len(path) > 1:
+            parent_iter = self.sidebar.get_parent(
+                treeview.get_selection().get_selected()[1])
+            parent_id = self.sidebar.get_id(parent_iter)
+            note_id = self.sidebar.get_id(path)
+            self.editor.set_text(
+                self.db[parent_id]['notes'][note_id].get_content())
+        else:
+            self.editor.set_text("")
+            if treeview.row_expanded(path) is False:
+                treeview.expand_row(path, True)
+            else:
+                treeview.collapse_row(path)
 
-			content = self.editor.get_text()
-			note_item = note.Note(title,content,[])
-			parent_iter = self.sidebar.get_parent(path)
-			parent_id = self.sidebar.get_id(parent_iter)
-			note_id = self.sidebar.get_id(path)
-			self.db[parent_id]['notes'][note_id] = note_item
-			self.sidebar.modify_item(path,title)
+    def save_note(self, event):
+        path = self.sidebar.get_selected()
+        # check if something was selected and that it was not a notebook
+        if path is not None and \
+                len(self.sidebar.get_path(path).to_string()) > 1:
+            clean_text = self.editor.get_clean_text()
+            if clean_text != "":
+                title = self.get_title(clean_text)
 
-	def start_database(self):
+            else:
+                title = "New Note"
 
-		db = shelve.open("database.db")
-		if not db:
-			self.db = {}
-			self.id = 0
-			self.notebook_id = 0
-		else:
-			self.db = db['notes']
-			self.id = db['note_id']
-			self.notebook_id = db['notebook_id']
+            content = self.editor.get_text()
+            note_item = note.Note(title, content, [])
+            parent_iter = self.sidebar.get_parent(path)
+            parent_id = self.sidebar.get_id(parent_iter)
+            note_id = self.sidebar.get_id(path)
+            self.db[parent_id]['notes'][note_id] = note_item
+            self.sidebar.modify_item(path, title)
 
-		for item in self.db:
-			notebook_iter = self.sidebar.add_notebook(self.db[item]['name'],item)
-			for note_item in self.db[item]['notes']:
-				self.sidebar.add_item(self.db[item]['notes'][note_item].get_title(),note_item,notebook_iter)
-		db.close()
+    def start_database(self):
 
-	def close_database(self,event):
-		db = shelve.open('database.db')
-		db['notes'] = self.db
-		db['note_id'] = self.id
-		db['notebook_id'] = self.notebook_id
-		db.close()
-		self.hide()
-		Gtk.main_quit()
+        db = shelve.open("/home/{}/database.db")
+        self.database = Database()
+        if not db:
+            self.id = 0
+            self.notebook_id = 0
+        else:
+            self.id = db['note_id']
+            self.notebook_id = db['notebook_id']
 
+        for item in self.db:
+            notebook_iter = self.sidebar.add_notebook(
+                self.db[item]['name'], item)
+            for note_item in self.db[item]['notes']:
+                self.sidebar.add_item(
+                    self.db[item]['notes'][note_item].get_title(),
+                    note_item,
+                    notebook_iter)
+        db.close()
 
-	def get_title(self,content):
+    def close_database(self, event):
+        db = shelve.open('database.db')
+        db['notes'] = self.db
+        db['note_id'] = self.id
+        db['notebook_id'] = self.notebook_id
+        db.close()
+        self.hide()
+        Gtk.main_quit()
 
-		content = content.lstrip()
-		title_index = content.find("\n")
-		if title_index < 20 and title_index != -1:
-			title = content[:title_index]
-		elif len(content) > 20:
-			title = content[:20]
-		else:
-			title = content
-		return title
-		
-	def on_button_clicked(self,widget,tag):
+    def get_title(self, content):
 
-		self.editor.toggle_tag(tag, None)
+        content = content.lstrip()
+        title_index = content.find("\n")
+        if title_index < 20 and title_index != -1:
+            title = content[:title_index]
+        elif len(content) > 20:
+            title = content[:20]
+        else:
+            title = content
+        return title
+
+    def on_button_clicked(self, widget, tag):
+
+        self.editor.toggle_tag(tag, None)
+
 
 win = MainWindow()
 win.show_all()
