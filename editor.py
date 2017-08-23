@@ -102,11 +102,7 @@ class Editor(Gtk.Grid):
     def set_text(self, content):
         self.textbuffer.set_text("")
         if content != "":
-            self.textbuffer.deserialize(
-                self.textbuffer,
-                self.deserialized_format,
-                self.textbuffer.get_start_iter(),
-                content)
+            self.textbuffer.deserialize(self.textbuffer,self.deserialized_format,self.textbuffer.get_start_iter(),content.encode("utf-8"))
         else:
             pass
 
