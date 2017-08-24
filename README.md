@@ -7,3 +7,5 @@ Note taking app with basic formatting (not markdown) built with Python and GTK 3
 The Trello board can be found here : https://trello.com/b/mc6cU0Mn
 
 Any help is welcomed :)
+
+![noted](https://user-images.githubusercontent.com/7538637/29683863-8d766598-8918-11e7-8cbf-bc9e47198ca5.png)
