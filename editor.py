@@ -63,25 +63,17 @@ class Editor(Gtk.Grid):
         # FORMAT TOOLBAR
         self.format_toolbar = ft.FormatBar()
         self.format_toolbar.bold.connect("clicked", self.toggle_tag, 'bold')
-        self.format_toolbar.italic.connect(
-            "clicked", self.toggle_tag, 'italic')
-        self.format_toolbar.underline.connect(
-            "clicked", self.toggle_tag, 'underline')
-        self.format_toolbar.ubuntu.connect(
-            "clicked", self.toggle_tag, 'ubuntu')
-        self.format_toolbar.just_right.connect(
-            'clicked', self.apply_tag, 'just_right')
-        self.format_toolbar.just_left.connect(
-            'clicked', self.apply_tag, 'just_left')
-        self.format_toolbar.just_center.connect(
-            'clicked', self.apply_tag, 'just_center')
-        self.format_toolbar.just_fill.connect(
-            'clicked', self.apply_tag, 'just_fill')
+        self.format_toolbar.italic.connect("clicked", self.toggle_tag, 'italic')
+        self.format_toolbar.underline.connect("clicked", self.toggle_tag, 'underline')
+        self.format_toolbar.ubuntu.connect("clicked", self.toggle_tag, 'ubuntu')
+        self.format_toolbar.just_right.connect('clicked', self.apply_tag, 'just_right')
+        self.format_toolbar.just_left.connect('clicked', self.apply_tag, 'just_left')
+        self.format_toolbar.just_center.connect('clicked', self.apply_tag, 'just_center')
+        self.format_toolbar.just_fill.connect('clicked', self.apply_tag, 'just_fill')
         self.format_toolbar.title.connect('clicked', self.apply_tag, 'title')
         self.format_toolbar.header.connect('clicked', self.apply_tag, 'header')
-        self.format_toolbar.image.connect("clicked", self.add_image)
-        self.format_toolbar.send_feedback.connect(
-            "clicked", self.send_feedback)
+        #self.format_toolbar.image.connect("clicked", self.add_image)
+        self.format_toolbar.send_feedback.connect("clicked", self.send_feedback)
 
         self.attach(self.scrolled_window, 0, 0, 2, 1)
         # self.attach(self.tag_bar,0,0,1,1)
@@ -102,7 +94,7 @@ class Editor(Gtk.Grid):
     def set_text(self, content):
         self.textbuffer.set_text("")
         if content != "":
-            self.textbuffer.deserialize(self.textbuffer,self.deserialized_format,self.textbuffer.get_start_iter(),content.encode("utf-8"))
+            self.textbuffer.deserialize(self.textbuffer,self.deserialized_format,self.textbuffer.get_start_iter(),content.encode("ISO-8859-1"))
         else:
             pass
 

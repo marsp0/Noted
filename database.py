@@ -46,8 +46,8 @@ class Database(object):
 
 	def modify_note(self,name,content,idd):
 		note = self.session.query(Note).filter_by(idd=idd).one()
-		note.name = unicode(name,'utf-8')
-		note.content = unicode(content, 'utf-8')
+		note.name = unicode(name,'ISO-8859-1')
+		note.content = unicode(content, 'ISO-8859-1')
 		self.session.commit()
 
 	def get_notebooks(self):

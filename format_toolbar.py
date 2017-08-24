@@ -78,12 +78,12 @@ class FormatBar(Gtk.Box):
         self.just_fill.set_tooltip_text(
             "Fill Justification (Select the entire line)")
 
-        self.image = Gtk.Button()
-        image = Gtk.Image.new_from_icon_name(
-            "multimedia-photo-manager", Gtk.IconSize.MENU)
-        image.show()
-        self.image.add(image)
-        self.image.set_tooltip_text("Add an image")
+        #self.image = Gtk.Button()
+        #image = Gtk.Image.new_from_icon_name(
+        #    "multimedia-photo-manager", Gtk.IconSize.MENU)
+        #image.show()
+        #self.image.add(image)
+        #self.image.set_tooltip_text("Add an image")
 
         self.send_feedback = Gtk.Button.new_with_label('Feedback')
         self.send_feedback.set_tooltip_text("Send Feedback")
@@ -113,7 +113,7 @@ class FormatBar(Gtk.Box):
         self.pack_start(self.underline, False, False, 0)
         self.pack_start(self.title, False, False, 0)
         self.pack_start(self.header, False, False, 0)
-        self.pack_start(self.image, False, False, 0)
+        #self.pack_start(self.image, False, False, 0)
         self.pack_start(self.ubuntu, False, False, 0)
         self.pack_start(self.just_left, False, False, 0)
         self.pack_start(self.just_center, False, False, 0)
