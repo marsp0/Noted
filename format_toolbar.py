@@ -95,18 +95,26 @@ class FormatBar(Gtk.Box):
         self.header = Gtk.Button.new_with_label("H")
         self.header.set_tooltip_text("Header")
 
+        self.undo = Gtk.Button()
+        image = Gtk.Image.new_from_icon_name("edit-undo-symbolic",Gtk.IconSize.MENU)
+        image.show()
+        self.undo.add(image)
+        self.undo.set_tooltip_text("Undo")
+
+        self.redo = Gtk.Button()
+        image = Gtk.Image.new_from_icon_name("edit-redo-symbolic",Gtk.IconSize.MENU)
+        image.show()
+        self.redo.add(image)
+        self.redo.set_tooltip_text("Redo")
+
         self.buttons = {}
         self.buttons['bold'] = self.bold
         self.buttons['italic'] = self.italic
         self.buttons['underline'] = self.underline
         self.buttons['ubuntu'] = self.ubuntu
-        # self.buttons['just_left'] = self.just_left
-        # self.buttons['just_right'] = self.just_right
-        # self.buttons['just_center'] = self.just_center
-        # self.buttons['just_fill'] = self.just_fill
-        # self.buttons['size'] = self.size
 
         self.pack_end(self.send_feedback, False, False, 0)
+
 
         self.pack_start(self.bold, False, False, 0)
         self.pack_start(self.italic, False, False, 0)
@@ -119,3 +127,5 @@ class FormatBar(Gtk.Box):
         self.pack_start(self.just_center, False, False, 0)
         self.pack_start(self.just_right, False, False, 0)
         self.pack_start(self.just_fill, False, False, 0)
+        self.pack_start(self.undo,False,False,0)
+        self.pack_start(self.redo,False,False,0)
