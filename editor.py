@@ -72,6 +72,7 @@ class Editor(Gtk.Grid):
         self.format_toolbar.header.connect('clicked', self.apply_tag, 'header')
         #self.format_toolbar.image.connect("clicked", self.add_image)
         self.format_toolbar.undo.connect("clicked", self.undo)
+        self.format_toolbar.redo.connect("clicked", self.redo)
         self.format_toolbar.send_feedback.connect("clicked", self.send_feedback)
 
         self.attach(self.scrolled_window, 0, 0, 2, 1)
@@ -144,6 +145,9 @@ class Editor(Gtk.Grid):
     def insert_with_tags(self, buf, start_iter, data, data_len):
         self.undoable = True
         end = self.textbuffer.props.cursor_position
+        #creating new start iter because the provided one
+        #gets invalidated for some reason
+        start_iter = self.textbuffer.get_iter_at_offset(end-1)
         end_iter = self.textbuffer.get_iter_at_offset(end)
         temp = []
         for tag in self.format_toolbar.buttons:
@@ -151,7 +155,8 @@ class Editor(Gtk.Grid):
                 temp.append(tag)
                 self.textbuffer.apply_tag(self.tags[tag], start_iter, end_iter)
 
-        '''UNDO the operation '''
+        '''UNDO info '''
+
         start_mark = buf.create_mark(None, buf.get_iter_at_offset(end-1), False)
         end_mark = buf.create_mark(None,buf.get_iter_at_offset(end),False)
         undo_text = AddText(buf,start_mark,end_mark,data)
@@ -162,16 +167,24 @@ class Editor(Gtk.Grid):
         self.undoable = False
 
     def delete(self,buf,start,end):
+
+        '''UNDO info'''
         if self.undoable:
             start_mark = buf.create_mark(None, start, False)
+            end_mark =buf.create_mark(None,end,False)
             data = buf.get_text(start,end,False)
-            item = RemoveText(buf,start_mark,data)
+            item = RemoveText(buf,start_mark,end_mark, data)
             self.undo_manager.add(item)
 
     def undo(self,event):
         action = self.undo_manager.undo()
         if action != None:
             action.undo()
+
+    def redo(self,event):
+        action = self.undo_manager.redo()
+        if action != None:
+            action.redo()
 
     def add_image(self, widget):
         dialog = Gtk.FileChooserDialog("Pick a file",
