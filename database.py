@@ -22,7 +22,7 @@ class Database(object):
 		self.session.close()
 
 	def create_note(self,name,content,idd,notebook_id):
-		note = Note(name=name,content=content,idd = idd,notebook_id = notebook_id)
+		note = Note(name=unicode(name,'iso-8859-1'),content=unicode(content,'iso-8859-1'),idd = idd,notebook_id = notebook_id)
 		self.session.add(note)
 		self.session.commit()
 
@@ -46,8 +46,8 @@ class Database(object):
 
 	def modify_note(self,name,content,idd):
 		note = self.session.query(Note).filter_by(idd=idd).one()
-		note.name = unicode(name,'ISO-8859-1')
-		note.content = unicode(content, 'ISO-8859-1')
+		note.name = unicode(name,'iso-8859-1')
+		note.content = unicode(content,'iso-8859-1')
 		self.session.commit()
 
 	def get_notebooks(self):

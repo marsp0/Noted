@@ -9,7 +9,7 @@ from undo_manager import UndoManager, ApplyTag, RemoveTag, AddText, RemoveText
 
 class Editor(Gtk.Grid):
 
-    def __init__(self):
+    def __init__(self,parent):
 
         Gtk.Grid.__init__(self, row_spacing=5, column_spacing=2)
 
@@ -19,7 +19,8 @@ class Editor(Gtk.Grid):
         self.scrolled_window.set_hexpand(True)
 
         self.undo_manager = UndoManager()
-        self.undoable = True
+        self.parent = parent
+        self.undo_in_progress = False
 
         # TextView
         self.textview = Gtk.TextView()
@@ -92,18 +93,16 @@ class Editor(Gtk.Grid):
                                         self.textbuffer.get_end_iter(), False)
 
     def set_text(self, content):
-        self.undoable = False
         self.textbuffer.set_text("")
         if content != "":
             self.textbuffer.deserialize(self.textbuffer,
                                         self.deserialized_format,
                                         self.textbuffer.get_start_iter(),
-                                        content.encode("ISO-8859-1"))
+                                        content.encode("iso-8859-1"))
         else:
             pass
 
     def toggle_tag(self, widget, tag):
-        self.undoable = True
         limits = self.textbuffer.get_selection_bounds()
         if len(limits) != 0:
             start, end = limits
@@ -113,7 +112,6 @@ class Editor(Gtk.Grid):
                 self.textbuffer.remove_tag(self.tags[tag], start, end)
 
     def apply_tag(self, widget, tag):
-        self.undoable = True
         limits = self.textbuffer.get_selection_bounds()
         if len(limits) != 0:
             start, end = limits
@@ -143,7 +141,6 @@ class Editor(Gtk.Grid):
             self.textbuffer.apply_tag(self.tags[tag], start, end)
 
     def insert_with_tags(self, buf, start_iter, data, data_len):
-        self.undoable = True
         end = self.textbuffer.props.cursor_position
         #creating new start iter because the provided one
         #gets invalidated for some reason
@@ -156,20 +153,18 @@ class Editor(Gtk.Grid):
                 self.textbuffer.apply_tag(self.tags[tag], start_iter, end_iter)
 
         '''UNDO info '''
-
-        start_mark = buf.create_mark(None, buf.get_iter_at_offset(end-1), False)
-        end_mark = buf.create_mark(None,buf.get_iter_at_offset(end),False)
-        undo_text = AddText(buf,start_mark,end_mark,data)
-        self.undo_manager.add(undo_text)
-        for tag in temp:
-            item = ApplyTag(buf,start_mark,end_mark,self.tags[tag])
-            self.undo_manager.add(item)
-        self.undoable = False
+        if self.undo_in_progress == False:
+            start_mark = buf.create_mark(None, buf.get_iter_at_offset(end-1), False)
+            end_mark = buf.create_mark(None,buf.get_iter_at_offset(end),False)
+            undo_text = AddText(buf,start_mark,end_mark,data)
+            self.undo_manager.add(undo_text)
+            for tag in temp:
+                item = ApplyTag(buf,start_mark,end_mark,self.tags[tag])
+                self.undo_manager.add(item)
 
     def delete(self,buf,start,end):
-
         '''UNDO info'''
-        if self.undoable:
+        if self.parent.get_focus() == self.textview and self.undo_in_progress == False:
             start_mark = buf.create_mark(None, start, False)
             end_mark =buf.create_mark(None,end,False)
             data = buf.get_text(start,end,False)
@@ -179,12 +174,16 @@ class Editor(Gtk.Grid):
     def undo(self,event):
         action = self.undo_manager.undo()
         if action != None:
+            self.undo_in_progress = True
             action.undo()
+            self.undo_in_progress = False
 
     def redo(self,event):
         action = self.undo_manager.redo()
         if action != None:
+            self.undo_in_progress = True
             action.redo()
+            self.undo_in_progress = False
 
     def add_image(self, widget):
         dialog = Gtk.FileChooserDialog("Pick a file",
@@ -220,7 +219,6 @@ class Editor(Gtk.Grid):
         dialog.destroy()
 
     def send_feedback(self, widget):
-        self.undoable = False
         try:
             result = subprocess.call(
                 ["pantheon-mail", "mailto:notedfeedback@gmail.com"])

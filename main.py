@@ -44,7 +44,7 @@ class MainWindow(Gtk.Window):
         self.sidebar.view.connect("row_activated", self.show_note)
 
         # EDITOR
-        self.editor = editor.Editor()
+        self.editor = editor.Editor(self)
 
         # loads the storage file and creates the dict db
         self.start_database()
@@ -69,7 +69,7 @@ class MainWindow(Gtk.Window):
         if self.sidebar.add_item("New Note", self.id):
             self.editor.set_text("")
             parent_id = self.sidebar.get_id(self.sidebar.get_selected())
-            self.database.create_note(u"New Note",u'',self.id, parent_id)
+            self.database.create_note("New Note",'',self.id, parent_id)
             self.id += 1
 
     def delete_note(self, button):

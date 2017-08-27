@@ -5,8 +5,10 @@ class UndoManager(object):
 		self.redo_stack = []
 
 	def undo(self):
-		#print self.undo_stack
 		if self.undo_stack:
+					#print self.undo_stack
+			for item in self.undo_stack:
+				print item, item.data
 			result =  self.undo_stack.pop()
 			self.redo_stack.append(result)
 			return result
@@ -15,6 +17,7 @@ class UndoManager(object):
 		#print self.redo_stack
 		if self.redo_stack:
 			result = self.redo_stack.pop()
+			self.undo_stack.append(result)
 			return result
 
 	def add(self,memento):
@@ -65,10 +68,12 @@ class RemoveText(object):
 		self.data = data
 
 	def undo(self):
+		print 'adding text {}'.format(self.data)
 		start_iter = self.buf.get_iter_at_mark(self.start)
 		self.buf.insert(start_iter,self.data)
 
 	def redo(self):
+		print 'removing text {}'.format(self.data)
 		start_iter = self.buf.get_iter_at_mark(self.start)
 		end_iter = self.buf.get_iter_at_mark(self.end)
 		self.buf.delete(start_iter,end_iter)
@@ -82,11 +87,13 @@ class AddText(object):
 		self.data = data
 
 	def undo(self):
+		print 'removing text {}'.format(self.data)
 		start_iter = self.buf.get_iter_at_mark(self.start)
 		end_iter = self.buf.get_iter_at_mark(self.end)
 		self.buf.delete(start_iter,end_iter)
 
 	def redo(self):
+		print 'adding text {}'.format(self.data)
 		start_iter = self.buf.get_iter_at_mark(self.start)
 		end_iter = self.buf.get_iter_at_mark(self.end)
 		self.buf.insert(start_iter,self.data)
