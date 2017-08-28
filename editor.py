@@ -152,23 +152,23 @@ class Editor(Gtk.Grid):
                 temp.append(tag)
                 self.textbuffer.apply_tag(self.tags[tag], start_iter, end_iter)
 
-        '''UNDO info '''
+        ''' UNDO info '''
         if self.undo_in_progress == False:
-            start_mark = buf.create_mark(None, buf.get_iter_at_offset(end-1), False)
-            end_mark = buf.create_mark(None,buf.get_iter_at_offset(end),False)
-            undo_text = AddText(buf,start_mark,end_mark,data)
+            start_offset = end-1
+            end_offset = end
+            undo_text = AddText(buf,start_offset,end_offset,data)
             self.undo_manager.add(undo_text)
             for tag in temp:
-                item = ApplyTag(buf,start_mark,end_mark,self.tags[tag])
+                item = ApplyTag(buf,start_offset,end_offset,self.tags[tag])
                 self.undo_manager.add(item)
 
     def delete(self,buf,start,end):
-        '''UNDO info'''
-        if self.parent.get_focus() == self.textview and self.undo_in_progress == False:
-            start_mark = buf.create_mark(None, start, False)
-            end_mark =buf.create_mark(None,end,False)
+        ''' UNDO info'''
+        if self.parent.get_focus() == self.textview:
+            start_offset = buf.props.cursor_position - 1
+            end_offset = buf.props.cursor_position
             data = buf.get_text(start,end,False)
-            item = RemoveText(buf,start_mark,end_mark, data)
+            item = RemoveText(buf,start_offset,end_offset, data)
             self.undo_manager.add(item)
 
     def undo(self,event):
@@ -181,9 +181,9 @@ class Editor(Gtk.Grid):
     def redo(self,event):
         action = self.undo_manager.redo()
         if action != None:
-            self.undo_in_progress = True
+            #self.undo_in_progress = True
             action.redo()
-            self.undo_in_progress = False
+            #self.undo_in_progress = False
 
     def add_image(self, widget):
         dialog = Gtk.FileChooserDialog("Pick a file",

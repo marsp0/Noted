@@ -6,9 +6,6 @@ class UndoManager(object):
 
 	def undo(self):
 		if self.undo_stack:
-					#print self.undo_stack
-			for item in self.undo_stack:
-				print item, item.data
 			result =  self.undo_stack.pop()
 			self.redo_stack.append(result)
 			return result
@@ -17,83 +14,75 @@ class UndoManager(object):
 		#print self.redo_stack
 		if self.redo_stack:
 			result = self.redo_stack.pop()
-			self.undo_stack.append(result)
+			#self.undo_stack.append(result)
 			return result
 
 	def add(self,memento):
 		self.undo_stack.append(memento)
 
+#############################################################
+# TAGS
+#############################################################
+
 class ApplyTag(object):
 
-	def __init__(self,buf, start_mark, end_mark, tag):
+	def __init__(self,buf, start_offset, end_offset, tag):
 		self.buf = buf
-		self.start = start_mark
-		self.end = end_mark
+		self.start = start_offset
+		self.end = end_offset
 		self.tag = tag
 
 	def undo(self):
-		start_iter = self.buf.get_iter_at_mark(self.start)
-		end_iter = self.buf.get_iter_at_mark(self.end)
+		start_iter = self.buf.get_iter_at_offset(self.start)
+		end_iter = self.buf.get_iter_at_offset(self.end)
 		self.buf.remove_tag(self.tag,start_iter,end_iter)
 
 	def redo(self):
-		start_iter = self.buf.get_iter_at_mark(self.start)
-		end_iter = self.buf.get_iter_at_mark(self.end)
+		start_iter = self.buf.get_iter_at_offset(self.start)
+		end_iter = self.buf.get_iter_at_offset(self.end)
 		self.buf.apply_tag(self.tag,start_iter,end_iter)
 
 class RemoveTag(object):
 
-	def __init__(self,buf,start_mark,end_mark,tag):
-		self.buf = buf
-		self.start=  start_mark
-		self.end = end_mark
-		self.tag = tag
+	def __init__(self,buf,start_offset,end_offset,tag):
+		ApplyTag.__init__(self,buf,start_offset,end_offset,tag)
 
 	def undo(self):
-		start_iter = self.buf.get_iter_at_mark(self.start)
-		end_iter = self.buf.get_iter_at_mark(self.end)
-		self.buf.apply_tag(self.tag,start_iter,end_iter)
+		ApplyTag.redo(self)
 
 	def redo(self):
-		start_iter = self.buf.get_iter_at_mark(self.start)
-		end_iter = self.buf.get_iter_at_mark(self.end)
-		self.buf.remove_tag(self.tag,start_iter,end_iter)
+		ApplyTag.undo(self)
 
-class RemoveText(object):
 
-	def __init__(self,buf,start_mark,end_mark, data):
-		self.buf = buf
-		self.start = start_mark
-		self.end = end_mark
-		self.data = data
-
-	def undo(self):
-		print 'adding text {}'.format(self.data)
-		start_iter = self.buf.get_iter_at_mark(self.start)
-		self.buf.insert(start_iter,self.data)
-
-	def redo(self):
-		print 'removing text {}'.format(self.data)
-		start_iter = self.buf.get_iter_at_mark(self.start)
-		end_iter = self.buf.get_iter_at_mark(self.end)
-		self.buf.delete(start_iter,end_iter)
+#############################################################
+# Text
+#############################################################
 
 class AddText(object):
 
-	def __init__(self,buf,start_mark,end_mark,data):
+	def __init__(self,buf,start_offset,end_offset,data):
 		self.buf = buf
-		self.start = start_mark
-		self.end = end_mark
+		self.start = start_offset
+		self.end = end_offset
 		self.data = data
 
 	def undo(self):
-		print 'removing text {}'.format(self.data)
-		start_iter = self.buf.get_iter_at_mark(self.start)
-		end_iter = self.buf.get_iter_at_mark(self.end)
+		start_iter = self.buf.get_iter_at_offset(self.start)
+		end_iter = self.buf.get_iter_at_offset(self.end)
 		self.buf.delete(start_iter,end_iter)
 
 	def redo(self):
-		print 'adding text {}'.format(self.data)
-		start_iter = self.buf.get_iter_at_mark(self.start)
-		end_iter = self.buf.get_iter_at_mark(self.end)
+		start_iter = self.buf.get_iter_at_offset(self.start)
+		end_iter = self.buf.get_iter_at_offset(self.end)
 		self.buf.insert(start_iter,self.data)
+
+class RemoveText(AddText):
+
+	def __init__(self,buf,start_offset,end_offset, data):
+		AddText.__init__(self, buf, start_offset,end_offset,data)
+
+	def undo(self):
+		AddText.redo(self)
+
+	def redo(self):
+		AddText.undo(self)
