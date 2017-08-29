@@ -66,6 +66,7 @@ class Editor(Gtk.Grid):
         self.format_toolbar.title.connect('clicked', self.apply_tag, 'title')
         self.format_toolbar.header.connect('clicked', self.apply_tag, 'header')
         #self.format_toolbar.image.connect("clicked", self.add_image)
+        self.format_toolbar.list.connect("clicked",self.add_list)
         self.format_toolbar.send_feedback.connect("clicked", self.send_feedback)
 
         self.attach(self.scrolled_window, 0, 0, 2, 1)
@@ -143,6 +144,10 @@ class Editor(Gtk.Grid):
         for tag in self.format_toolbar.buttons:
             if self.format_toolbar.buttons[tag].get_active():
                 self.textbuffer.apply_tag(self.tags[tag], start_iter, end_iter)
+        if self.format_toolbar.list.get_active():
+            if data == '\n':
+                new_iter = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
+                self.textbuffer.insert(new_iter,'\t- ', 3)
 
 
     def add_image(self, widget):
@@ -177,6 +182,11 @@ class Editor(Gtk.Grid):
             self.textbuffer.insert_pixbuf(cursor_iter, image)
 
         dialog.destroy()
+
+    def add_list(self,widget):
+        if self.format_toolbar.list.get_active():
+            current_position = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
+            self.textbuffer.insert(current_position, '\n\t- ')
 
     def send_feedback(self, widget):
         try:
