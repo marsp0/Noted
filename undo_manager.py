@@ -6,6 +6,7 @@ class UndoManager(object):
 
 	def undo(self):
 		if self.undo_stack:
+			print len(self.undo_stack)
 			result =  self.undo_stack.pop()
 			self.redo_stack.append(result)
 			return result
@@ -17,8 +18,23 @@ class UndoManager(object):
 			#self.undo_stack.append(result)
 			return result
 
-	def add(self,memento):
+	def add(self,memento,to_cancel=None):
 		self.undo_stack.append(memento)
+
+#############################################################
+# Memento
+#############################################################
+
+class Memento(object):
+
+	def __init__(self, buf, format, data):
+		self.buf = buf
+		self.data = data
+		self.format = format
+
+	def undo(self):
+		self.buf.set_text("")
+		self.buf.deserialize(self.buf,self.format,self.buf.get_start_iter(),self.data.encode("iso-8859-1"))
 
 #############################################################
 # TAGS

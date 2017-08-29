@@ -127,5 +127,5 @@ class FormatBar(Gtk.Box):
         self.pack_start(self.just_center, False, False, 0)
         self.pack_start(self.just_right, False, False, 0)
         self.pack_start(self.just_fill, False, False, 0)
-        self.pack_start(self.undo,False,False,0)
-        self.pack_start(self.redo,False,False,0)
+        #self.pack_start(self.undo,False,False,0)
+        #self.pack_start(self.redo,False,False,0)

@@ -4,7 +4,6 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, Pango, GdkPixbuf
 import format_toolbar as ft
 import subprocess
-from undo_manager import UndoManager, ApplyTag, RemoveTag, AddText, RemoveText
 
 
 class Editor(Gtk.Grid):
@@ -17,10 +16,6 @@ class Editor(Gtk.Grid):
         self.scrolled_window = Gtk.ScrolledWindow()
         self.scrolled_window.set_vexpand(True)
         self.scrolled_window.set_hexpand(True)
-
-        self.undo_manager = UndoManager()
-        self.parent = parent
-        self.undo_in_progress = False
 
         # TextView
         self.textview = Gtk.TextView()
@@ -51,7 +46,6 @@ class Editor(Gtk.Grid):
 
         # SIGNAL CONNECTIONS
         self.textbuffer.connect_after("insert-text", self.insert_with_tags)
-        self.textbuffer.connect("delete-range", self.delete)
 
 
         # TAGS
@@ -72,20 +66,21 @@ class Editor(Gtk.Grid):
         self.format_toolbar.title.connect('clicked', self.apply_tag, 'title')
         self.format_toolbar.header.connect('clicked', self.apply_tag, 'header')
         #self.format_toolbar.image.connect("clicked", self.add_image)
-        self.format_toolbar.undo.connect("clicked", self.undo)
-        self.format_toolbar.redo.connect("clicked", self.redo)
         self.format_toolbar.send_feedback.connect("clicked", self.send_feedback)
 
         self.attach(self.scrolled_window, 0, 0, 2, 1)
         # self.attach(self.tag_bar,0,0,1,1)
         self.attach(self.format_toolbar, 0, 1, 2, 1)
 
-    def get_text(self):
-
+    def get_text(self,start=None,end=None):
+        if not start:
+            start = self.textbuffer.get_start_iter()
+        if not end:
+            end = self.textbuffer.get_end_iter()
         return self.textbuffer.serialize(self.textbuffer,
                                          self.serialized_format,
-                                         self.textbuffer.get_start_iter(),
-                                         self.textbuffer.get_end_iter())
+                                         start,
+                                         end)
 
     def get_clean_text(self):
 
@@ -135,8 +130,7 @@ class Editor(Gtk.Grid):
                 self.textbuffer.remove_tag(self.tags['just_fill'], start, end)
             elif tag == 'just_fill':
                 self.textbuffer.remove_tag(self.tags['just_right'], start, end)
-                self.textbuffer.remove_tag(
-                    self.tags['just_center'], start, end)
+                self.textbuffer.remove_tag(self.tags['just_center'], start, end)
                 self.textbuffer.remove_tag(self.tags['just_left'], start, end)
             self.textbuffer.apply_tag(self.tags[tag], start, end)
 
@@ -146,44 +140,10 @@ class Editor(Gtk.Grid):
         #gets invalidated for some reason
         start_iter = self.textbuffer.get_iter_at_offset(end-1)
         end_iter = self.textbuffer.get_iter_at_offset(end)
-        temp = []
         for tag in self.format_toolbar.buttons:
             if self.format_toolbar.buttons[tag].get_active():
-                temp.append(tag)
                 self.textbuffer.apply_tag(self.tags[tag], start_iter, end_iter)
 
-        ''' UNDO info '''
-        if self.undo_in_progress == False:
-            start_offset = end-1
-            end_offset = end
-            undo_text = AddText(buf,start_offset,end_offset,data)
-            self.undo_manager.add(undo_text)
-            for tag in temp:
-                item = ApplyTag(buf,start_offset,end_offset,self.tags[tag])
-                self.undo_manager.add(item)
-
-    def delete(self,buf,start,end):
-        ''' UNDO info'''
-        if self.parent.get_focus() == self.textview:
-            start_offset = buf.props.cursor_position - 1
-            end_offset = buf.props.cursor_position
-            data = buf.get_text(start,end,False)
-            item = RemoveText(buf,start_offset,end_offset, data)
-            self.undo_manager.add(item)
-
-    def undo(self,event):
-        action = self.undo_manager.undo()
-        if action != None:
-            self.undo_in_progress = True
-            action.undo()
-            self.undo_in_progress = False
-
-    def redo(self,event):
-        action = self.undo_manager.redo()
-        if action != None:
-            #self.undo_in_progress = True
-            action.redo()
-            #self.undo_in_progress = False
 
     def add_image(self, widget):
         dialog = Gtk.FileChooserDialog("Pick a file",
