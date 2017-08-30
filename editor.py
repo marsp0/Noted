@@ -47,12 +47,6 @@ class Editor(Gtk.Grid):
         # SIGNAL CONNECTIONS
         self.textbuffer.connect_after("insert-text", self.insert_with_tags)
 
-
-        # TAGS
-        self.tag_bar = Gtk.Entry()
-        self.tag_bar.set_placeholder_text("Not Implemented")
-        self.tag_bar.set_hexpand(True)
-
         # FORMAT TOOLBAR
         self.format_toolbar = ft.FormatBar()
         self.format_toolbar.bold.connect("clicked", self.toggle_tag, 'bold')
@@ -69,8 +63,8 @@ class Editor(Gtk.Grid):
         self.format_toolbar.list.connect("clicked",self.add_list)
         self.format_toolbar.send_feedback.connect("clicked", self.send_feedback)
 
+
         self.attach(self.scrolled_window, 0, 0, 2, 1)
-        # self.attach(self.tag_bar,0,0,1,1)
         self.attach(self.format_toolbar, 0, 1, 2, 1)
 
     def get_text(self,start=None,end=None):
@@ -139,14 +133,15 @@ class Editor(Gtk.Grid):
         end = self.textbuffer.props.cursor_position
         #creating new start iter because the provided one
         #gets invalidated for some reason
-        start_iter = self.textbuffer.get_iter_at_offset(end-1)
+        start_iter = self.textbuffer.get_iter_at_offset(end-data_len)
         end_iter = self.textbuffer.get_iter_at_offset(end)
+        #print 'the content is', self.textbuffer.get_text(start_iter,end_iter,False), repr(data)
         for tag in self.format_toolbar.buttons:
             if self.format_toolbar.buttons[tag].get_active():
                 self.textbuffer.apply_tag(self.tags[tag], start_iter, end_iter)
         if self.format_toolbar.list.get_active():
             if data == '\n':
-                new_iter = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
+                new_iter = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position+1)
                 self.textbuffer.insert(new_iter,'\t- ', 3)
 
 
@@ -185,7 +180,7 @@ class Editor(Gtk.Grid):
 
     def add_list(self,widget):
         if self.format_toolbar.list.get_active():
-            current_position = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
+            current_position = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position+4)
             self.textbuffer.insert(current_position, '\n\t- ')
 
     def send_feedback(self, widget):
