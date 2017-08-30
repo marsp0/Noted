@@ -17,7 +17,7 @@ class FormatBar(Gtk.Box):
             "format-text-bold-symbolic", Gtk.IconSize.MENU)
         image.show()
         self.bold.add(image)
-        self.bold.set_tooltip_text("Bold")
+        self.bold.set_tooltip_text("Bold (Ctrl+B)")
 
         # Italic
         self.italic = Gtk.ToggleButton()
@@ -25,7 +25,7 @@ class FormatBar(Gtk.Box):
             "format-text-italic-symbolic", Gtk.IconSize.MENU)
         image.show()
         self.italic.add(image)
-        self.italic.set_tooltip_text("Italic")
+        self.italic.set_tooltip_text("Italic (Ctrl+I)")
 
         # Underline
         self.underline = Gtk.ToggleButton()
@@ -33,7 +33,7 @@ class FormatBar(Gtk.Box):
             "format-text-underline-symbolic", Gtk.IconSize.MENU)
         image.show()
         self.underline.add(image)
-        self.underline.set_tooltip_text("Underline")
+        self.underline.set_tooltip_text("Underline (Ctrl+U)")
 
         # ubuntu font
         self.ubuntu = Gtk.ToggleButton.new_with_label("Ubuntu Mono")
@@ -52,7 +52,7 @@ class FormatBar(Gtk.Box):
         image.show()
         self.just_left.add(image)
         self.just_left.set_tooltip_text(
-            "Left Justification (Select the entire line)")
+            "Left Justification (Select the entire line) (Ctrl+L)")
 
         self.just_center = Gtk.Button()
         image = Gtk.Image.new_from_icon_name(
@@ -60,7 +60,7 @@ class FormatBar(Gtk.Box):
         image.show()
         self.just_center.add(image)
         self.just_center.set_tooltip_text(
-            "Center Justification (Select the entire line)")
+            "Center Justification (Select the entire line) (Ctrl+E)")
 
         self.just_right = Gtk.Button()
         image = Gtk.Image.new_from_icon_name(
@@ -68,7 +68,7 @@ class FormatBar(Gtk.Box):
         image.show()
         self.just_right.add(image)
         self.just_left.set_tooltip_text(
-            "Left Justification (Select the entire line)")
+            "Left Justification (Select the entire line) (Ctrl+R)")
 
         self.just_fill = Gtk.Button()
         image = Gtk.Image.new_from_icon_name(
@@ -76,7 +76,7 @@ class FormatBar(Gtk.Box):
         image.show()
         self.just_fill.add(image)
         self.just_fill.set_tooltip_text(
-            "Fill Justification (Select the entire line)")
+            "Fill Justification (Select the entire line) (Ctrl+J)")
 
         #self.image = Gtk.Button()
         #image = Gtk.Image.new_from_icon_name(
@@ -90,10 +90,10 @@ class FormatBar(Gtk.Box):
         self.send_feedback.props.relief = Gtk.ReliefStyle(2)
 
         self.title = Gtk.Button.new_with_label("T")
-        self.title.set_tooltip_text("Title")
+        self.title.set_tooltip_text("Title (Ctrl+T)")
 
         self.header = Gtk.Button.new_with_label("H")
-        self.header.set_tooltip_text("Header")
+        self.header.set_tooltip_text("Header (Ctrl+H)")
 
         #self.undo = Gtk.Button()
         #image = Gtk.Image.new_from_icon_name("edit-undo-symbolic",Gtk.IconSize.MENU)
@@ -111,7 +111,7 @@ class FormatBar(Gtk.Box):
         image = Gtk.Image.new_from_icon_name("view-list-compact-symbolic", Gtk.IconSize.MENU)
         image.show()
         self.list.add(image)
-        self.list.set_tooltip_text("List")
+        self.list.set_tooltip_text("List (Ctrl+G)")
 
         self.buttons = {}
         self.buttons['bold'] = self.bold

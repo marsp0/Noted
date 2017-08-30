@@ -1,6 +1,6 @@
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 import sidebar as sb
 import headerbar as hb
 import editor
@@ -35,6 +35,9 @@ class MainWindow(Gtk.Window):
 
         # Delete Button
         hbar.delete_button.connect("clicked", self.delete_note)
+
+        #shortcuts
+        self.connect("key-press-event",self.on_key_press)
 
         # MAIN WINDOW
         main_window = Gtk.Grid(column_homogeneous=False, column_spacing=5)
@@ -162,6 +165,21 @@ class MainWindow(Gtk.Window):
     def on_button_clicked(self, widget, tag):
 
         self.editor.toggle_tag(tag, None)
+
+
+    def on_key_press(self,widget,event):
+        keyval = event.keyval
+        keyval_name = Gdk.keyval_name(keyval)
+        state = event.state
+        ctrl = (state & Gdk.ModifierType.CONTROL_MASK)
+        if ctrl and keyval_name == 's':
+            self.save_note(None)
+        elif ctrl and keyval_name == 'n':
+            self.create_note(None)
+        elif ctrl and keyval_name == 'k':
+            self.create_notebook(None)
+        elif ctrl and keyval_name == 'd':
+            self.delete_note(None)
 
 
 win = MainWindow()

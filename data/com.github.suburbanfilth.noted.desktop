@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Noted
+GenericName=Note
+Comment=Take notes with ease
+Categories=Utility;Education;Office
+Exec=com.github.suburbanfilth.Noted
+Icon=application-default-icon
+Terminal=false
+Type=Application
+X-GNOME-Gettext-Domain=hello-again
+Keywords=Hello;World;Example;

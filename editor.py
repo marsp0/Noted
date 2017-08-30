@@ -16,6 +16,7 @@ class Editor(Gtk.Grid):
         self.scrolled_window = Gtk.ScrolledWindow()
         self.scrolled_window.set_vexpand(True)
         self.scrolled_window.set_hexpand(True)
+        self.parent = parent
 
         # TextView
         self.textview = Gtk.TextView()
@@ -46,6 +47,9 @@ class Editor(Gtk.Grid):
 
         # SIGNAL CONNECTIONS
         self.textbuffer.connect_after("insert-text", self.insert_with_tags)
+
+        #Shortcuts
+        self.parent.connect('key-press-event',self.activate_shortcuts)
 
         # FORMAT TOOLBAR
         self.format_toolbar = ft.FormatBar()
@@ -133,14 +137,14 @@ class Editor(Gtk.Grid):
         end = self.textbuffer.props.cursor_position
         #creating new start iter because the provided one
         #gets invalidated for some reason
-        start_iter = self.textbuffer.get_iter_at_offset(end-data_len)
+        start_iter = self.textbuffer.get_iter_at_offset(end-1)
         end_iter = self.textbuffer.get_iter_at_offset(end)
-        #print 'the content is', self.textbuffer.get_text(start_iter,end_iter,False), repr(data)
         for tag in self.format_toolbar.buttons:
             if self.format_toolbar.buttons[tag].get_active():
                 self.textbuffer.apply_tag(self.tags[tag], start_iter, end_iter)
         if self.format_toolbar.list.get_active():
             if data == '\n':
+                print 'dsa sss'
                 new_iter = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position+1)
                 self.textbuffer.insert(new_iter,'\t- ', 3)
 
@@ -180,7 +184,7 @@ class Editor(Gtk.Grid):
 
     def add_list(self,widget):
         if self.format_toolbar.list.get_active():
-            current_position = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position+4)
+            current_position = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
             self.textbuffer.insert(current_position, '\n\t- ')
 
     def send_feedback(self, widget):
@@ -189,3 +193,41 @@ class Editor(Gtk.Grid):
                 ["pantheon-mail", "mailto:notedfeedback@gmail.com"])
         except OSError:
             pass
+
+    def activate_shortcuts(self,widget,event):
+        keyval = event.keyval
+        keyval_name = Gdk.keyval_name(keyval)
+        state = event.state
+        ctrl = (state & Gdk.ModifierType.CONTROL_MASK)
+        if ctrl and keyval_name == 'b':
+            if self.format_toolbar.bold.get_active():
+                self.format_toolbar.bold.set_active(False)
+            else:
+                self.format_toolbar.bold.set_active(True)
+        elif ctrl and keyval_name == 'i':
+            if self.format_toolbar.italic.get_active():
+                self.format_toolbar.italic.set_active(False)
+            else:
+                self.format_toolbar.italic.set_active(True)
+        elif ctrl and keyval_name == 'u':
+            if self.format_toolbar.underline.get_active():
+                self.format_toolbar.underline.set_active(False)
+            else:
+                self.format_toolbar.underline.set_active(True)
+        elif ctrl and keyval_name == 't':
+            self.apply_tag(None,'title')
+        elif ctrl and keyval_name == 'h':
+            self.apply_tag(None,'header')
+        elif ctrl and keyval_name == 'l':
+            self.apply_tag(None,'just_left')
+        elif ctrl and keyval_name == 'r':
+            self.apply_tag(None,'just_right')
+        elif ctrl and keyval_name == 'e':
+            self.apply_tag(None,'just_center')
+        elif ctrl and keyval_name == 'j':
+            self.apply_tag(None,'just_fill')
+        elif ctrl and keyval_name == 'g':
+            if self.format_toolbar.list.get_active():
+                self.format_toolbar.list.set_active(False)
+            else:
+                self.format_toolbar.list.set_active(True)
