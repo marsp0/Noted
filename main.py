@@ -178,8 +178,8 @@ class MainWindow(Gtk.Window):
             self.create_note(None)
         elif ctrl and keyval_name == 'k':
             self.create_notebook(None)
-        elif ctrl and keyval_name == 'd':
-            self.delete_note(None)
+        elif ctrl and keyval_name == 'q':
+            self.close_database(None)
 
 
 win = MainWindow()

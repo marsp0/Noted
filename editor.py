@@ -57,16 +57,22 @@ class Editor(Gtk.Grid):
         self.format_toolbar.italic.connect("clicked", self.toggle_tag, 'italic')
         self.format_toolbar.underline.connect("clicked", self.toggle_tag, 'underline')
         self.format_toolbar.ubuntu.connect("clicked", self.toggle_tag, 'ubuntu')
-        self.format_toolbar.just_right.connect('clicked', self.apply_tag, 'just_right')
-        self.format_toolbar.just_left.connect('clicked', self.apply_tag, 'just_left')
-        self.format_toolbar.just_center.connect('clicked', self.apply_tag, 'just_center')
-        self.format_toolbar.just_fill.connect('clicked', self.apply_tag, 'just_fill')
+        self.format_toolbar.just_right.connect('clicked', self.apply_just, 'just_right')
+        self.format_toolbar.just_left.connect('clicked', self.apply_just, 'just_left')
+        self.format_toolbar.just_center.connect('clicked', self.apply_just, 'just_center')
+        self.format_toolbar.just_fill.connect('clicked', self.apply_just, 'just_fill')
         self.format_toolbar.title.connect('clicked', self.apply_tag, 'title')
         self.format_toolbar.header.connect('clicked', self.apply_tag, 'header')
         #self.format_toolbar.image.connect("clicked", self.add_image)
         self.format_toolbar.list.connect("clicked",self.add_list)
         self.format_toolbar.send_feedback.connect("clicked", self.send_feedback)
 
+        #keep a dict so that we have the buttons act like Toggle buttons
+        self.just_buttons = {}
+        self.just_buttons['just_left'] = False
+        self.just_buttons['just_center'] = False
+        self.just_buttons['just_right'] = False
+        self.just_buttons['just_fill'] = False
 
         self.attach(self.scrolled_window, 0, 0, 2, 1)
         self.attach(self.format_toolbar, 0, 1, 2, 1)
@@ -107,6 +113,11 @@ class Editor(Gtk.Grid):
 
     def apply_tag(self, widget, tag):
         limits = self.textbuffer.get_selection_bounds()
+        #if tag == 'just_right':
+        #    print 'ds'
+        #    current_position = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
+        #    next = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position+1)
+        #    self.textbuffer.apply_tag(self.tags[tag],current_position,next)
         if len(limits) != 0:
             start, end = limits
             if tag == 'header':
@@ -133,6 +144,27 @@ class Editor(Gtk.Grid):
                 self.textbuffer.remove_tag(self.tags['just_left'], start, end)
             self.textbuffer.apply_tag(self.tags[tag], start, end)
 
+    def apply_just(self,widget,tag):
+        current_position = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
+        current_line = current_position.get_line()
+        current_line_offset = current_position.get_line_offset()
+        if current_line_offset == 0:
+            for button in self.just_buttons:
+                if button != tag:
+                    self.just_buttons[button] = False
+            self.just_buttons[tag] = True
+        else:
+            start_iter = self.textbuffer.get_iter_at_line_offset(current_line,0)
+            end_iter = self.textbuffer.get_iter_at_line_offset(current_line,1)
+            for button in self.just_buttons:
+                if button != tag:
+                    self.just_buttons[button] = False
+                    self.textbuffer.remove_tag(self.tags[button],start_iter,end_iter)
+                else:
+                    self.just_buttons[tag] = True
+                    self.textbuffer.apply_tag(self.tags[tag],start_iter,end_iter)
+
+
     def insert_with_tags(self, buf, start_iter, data, data_len):
         end = self.textbuffer.props.cursor_position
         #creating new start iter because the provided one
@@ -142,10 +174,14 @@ class Editor(Gtk.Grid):
         for tag in self.format_toolbar.buttons:
             if self.format_toolbar.buttons[tag].get_active():
                 self.textbuffer.apply_tag(self.tags[tag], start_iter, end_iter)
+        if start_iter.get_line_offset() == 0:
+            for item in self.just_buttons:
+                if self.just_buttons[item] == True:
+                    self.textbuffer.apply_tag(self.tags[item],start_iter,end_iter)
+                    self.textbuffer.place_cursor(end_iter)
         if self.format_toolbar.list.get_active():
             if data == '\n':
-                print 'dsa sss'
-                new_iter = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position+1)
+                new_iter = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
                 self.textbuffer.insert(new_iter,'\t- ', 3)
 
 
@@ -219,13 +255,13 @@ class Editor(Gtk.Grid):
         elif ctrl and keyval_name == 'h':
             self.apply_tag(None,'header')
         elif ctrl and keyval_name == 'l':
-            self.apply_tag(None,'just_left')
+            self.apply_just(None,'just_left')
         elif ctrl and keyval_name == 'r':
-            self.apply_tag(None,'just_right')
+            self.apply_just(None,'just_right')
         elif ctrl and keyval_name == 'e':
-            self.apply_tag(None,'just_center')
+            self.apply_just(None,'just_center')
         elif ctrl and keyval_name == 'j':
-            self.apply_tag(None,'just_fill')
+            self.apply_just(None,'just_fill')
         elif ctrl and keyval_name == 'g':
             if self.format_toolbar.list.get_active():
                 self.format_toolbar.list.set_active(False)
