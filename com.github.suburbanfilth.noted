@@ -8,8 +8,6 @@ launch_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 # Update sys.path to include modules
 if launch_dir == "/usr/bin":
     modules_path = "/usr/share/com.github.suburbanfilth.noted/noted"
-    if not os.path.isdir(modules_path):
-        modules_path = "/usr/share/pyshared/noted"
 else:
     modules_path = launch_dir + "/noted"
 
