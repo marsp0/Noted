@@ -181,7 +181,7 @@ class MainWindow(Gtk.Window):
         elif ctrl and keyval_name == 'q':
             self.close_database(None)
 
-
-win = MainWindow()
-win.show_all()
-Gtk.main()
+def start():
+    win = MainWindow()
+    win.show_all()
+    Gtk.main()
