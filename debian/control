@@ -1,0 +1,16 @@
+Source: com.github.suburbanfilth.noted
+X-Python-Version: >= 2.6
+Section: editors
+Priority: optional
+Maintainer: David Hewitt <davidmhewitt@gmail.com>
+Build-Depends: debhelper (>= 10),
+               dh-python,
+               python-all,
+               python-setuptools              
+Standards-Version: 3.9.3
+
+Package: com.github.suburbanfilth.noted
+Architecture: any
+Depends: ${python:Depends}, ${misc:Depends}, python-sqlalchemy
+Description: Note taking app
+ Take notes with ease with inline formatting
