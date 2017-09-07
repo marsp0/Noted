@@ -1,0 +1,11 @@
++<?xml version="1.0" encoding="UTF-8"?>
+ +<!-- Copyright 2017 Your Name <you@email.com> -->
+ +<component type="desktop">
+ +  <id>com.github.suburbanfilth.noted.desktop</id>
+ +  <metadata_license>CC0</metadata_license>
+ +  <name>Noted</name>
+ +  <summary>Take notes with ease</summary>
+ +  <description>
+ +    <p>Note taking app that offers inline formatting</p>
+ +  </description>
+ +</component> 

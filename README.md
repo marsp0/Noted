@@ -9,3 +9,5 @@ The Trello board can be found here : https://trello.com/b/mc6cU0Mn
 Any help is welcomed :)
 
 ![noted](https://user-images.githubusercontent.com/7538637/29683863-8d766598-8918-11e7-8cbf-bc9e47198ca5.png)
+
+Icons made by [Smashicons](https://www.flaticon.com/authors/smashicons) from [Flaticon](https://www.flaticon.com/) is licensed by [Creative Commons BY 3.0](http://creativecommons.org/licenses/by/3.0/).
