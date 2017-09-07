@@ -10,7 +10,7 @@ Any help is welcomed :)
 
 ![noted](https://user-images.githubusercontent.com/7538637/29683863-8d766598-8918-11e7-8cbf-bc9e47198ca5.png)
 
-#Installation
+# Installation
 
 To run the app you need SQLAlchemy, you can install it with `apt-get install python-sqlalchemy`
 
