@@ -2,9 +2,9 @@
 Name=Noted
 GenericName=Note
 Comment=Take notes with ease
-Categories=Utility;Education;Office
+Categories=Utility;Education;Office;
 Exec=com.github.suburbanfilth.noted
-Icon=Noted.png
+Icon=Noted
 Terminal=false
 Type=Application
 X-GNOME-Gettext-Domain=hello-again
