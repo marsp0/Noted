@@ -1,11 +1,24 @@
-+<?xml version="1.0" encoding="UTF-8"?>
- +<!-- Copyright 2017 Your Name <you@email.com> -->
- +<component type="desktop">
- +  <id>com.github.suburbanfilth.noted.desktop</id>
- +  <metadata_license>CC0</metadata_license>
- +  <name>Noted</name>
- +  <summary>Take notes with ease</summary>
- +  <description>
- +    <p>Note taking app that offers inline formatting</p>
- +  </description>
- +</component> 
+<?xml version="1.0" encoding="UTF-8"?>
+  <!-- Copyright 2017 Your Name <you@email.com> -->
+  <component type="desktop">
+  <id>com.github.suburbanfilth.noted.desktop</id>
+    <metadata_license>CC0</metadata_license>
+    <name>Noted</name>
+    <summary>Take notes with ease</summary>
+    <description>
+      <p>Note taking app that offers inline formatting</p>
+    </description>
+    <screenshots>
+      <screenshot type="default">
+        <image>https://user-images.githubusercontent.com/7538637/30169485-3233d660-93f5-11e7-8a03-205cafe8c9f9.png</image>
+      </screenshot>
+    </screenshots>
+    <developer_name>Martin Spasov</developer_name>
+    <url type="homepage">https://github.com/SuburbanFilth</url>
+    <url type="bugtracker">https://github.com/SuburbanFilth/Noted/issues</url>
+    <url type="help">https://github.com/SuburbanFilth/Noted/issues</url>
+    <update_contact>notedfeedback@gmail.com</update_contact>
+    <custom>
+      <value key="x-appcenter-color-primary">#27A08A</value>
+    </custom>
+    </component>
