@@ -11,7 +11,7 @@ install_data = [('share/applications', ['data/com.github.suburbanfilth.noted.des
                 ('share/icons/hicolor/128x128/apps',['data/icons/128/Noted.png'])]
 
 setup(  name='Noted',
-        version='1.0.0',
+        version='0.1',
         author='Martin Spasov',
         description='Take notes with ease',
         url='https://github.com/SuburbanFilth/noted',

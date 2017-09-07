@@ -8,7 +8,7 @@ import subprocess
 class Database(object):
 
 	def start_database(self):
-		db_path = "/home/{}/noted/sqlitedatabase.db".format(getpass.getuser())
+		db_path = "/home/{}/Noted/sqlitedatabase.db".format(getpass.getuser())
 		if not os.path.exists(db_path):
 			self.engine = create_engine('sqlite:///{}'.format(db_path),echo=False)
 			Base.metadata.create_all(self.engine)

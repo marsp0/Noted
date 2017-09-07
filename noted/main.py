@@ -122,10 +122,10 @@ class MainWindow(Gtk.Window):
             self.sidebar.modify_item(path, title)
 
     def start_database(self):
-        path = "/home/{}/noted".format(getpass.getuser())
+        path = "/home/{}/Noted".format(getpass.getuser())
         if not os.path.exists(path):
             subprocess.call(['mkdir', path])
-        db = shelve.open("/home/{}/noted/database.db".format(getpass.getuser()))
+        db = shelve.open("/home/{}/Noted/database.db".format(getpass.getuser()))
         self.database = Database()
         self.database.start_database()
         if not db:
@@ -142,7 +142,7 @@ class MainWindow(Gtk.Window):
         db.close()
 
     def close_database(self, event):
-        db = shelve.open("/home/{}/noted/database.db".format(getpass.getuser()))
+        db = shelve.open("/home/{}/Noted/database.db".format(getpass.getuser()))
         db['note_id'] = self.id
         db['notebook_id'] = self.notebook_id
         db.close()
@@ -185,3 +185,6 @@ def start():
     win = MainWindow()
     win.show_all()
     Gtk.main()
+
+if __name__=='__main__':
+    start()
