@@ -1,6 +1,6 @@
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, GLib
 import sidebar as sb
 import headerbar as hb
 import editor
@@ -8,7 +8,6 @@ import shelve
 from dialogs import notebook_dialog as nd
 from dialogs import delete_dialog as dd
 from database import Database
-import getpass
 import os
 import subprocess
 
@@ -122,10 +121,10 @@ class MainWindow(Gtk.Window):
             self.sidebar.modify_item(path, title)
 
     def start_database(self):
-        path = "/home/{}/Noted".format(getpass.getuser())
+        path = "{}/Noted".format(GLib.get_user_data_dir())
         if not os.path.exists(path):
             subprocess.call(['mkdir', path])
-        db = shelve.open("/home/{}/Noted/database.db".format(getpass.getuser()))
+        db = shelve.open("{}/database.db".format(path))
         self.database = Database()
         self.database.start_database()
         if not db:
@@ -142,7 +141,8 @@ class MainWindow(Gtk.Window):
         db.close()
 
     def close_database(self, event):
-        db = shelve.open("/home/{}/Noted/database.db".format(getpass.getuser()))
+        path = GLib.get_user_data_dir()
+        db = shelve.open("{}/Noted/database.db".format(path))
         db['note_id'] = self.id
         db['notebook_id'] = self.notebook_id
         db.close()

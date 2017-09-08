@@ -1,14 +1,17 @@
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import GLib
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_tables import Notebook, Note, Base
-import getpass
 import os
 import subprocess
 
 class Database(object):
 
 	def start_database(self):
-		db_path = "/home/{}/Noted/sqlitedatabase.db".format(getpass.getuser())
+		path = GLib.get_user_data_dir()
+		db_path = "{}/Noted/sqlitedatabase.db".format(path)
 		if not os.path.exists(db_path):
 			self.engine = create_engine('sqlite:///{}'.format(db_path),echo=False)
 			Base.metadata.create_all(self.engine)
