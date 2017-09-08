@@ -18,6 +18,9 @@ class Editor(Gtk.Grid):
         self.scrolled_window.set_hexpand(True)
         self.parent = parent
 
+        self.current_indent_level = 1
+        self.offset_after_tab_deletion = None
+
         # TextView
         self.textview = Gtk.TextView()
         self.textview.set_wrap_mode(3)
@@ -47,6 +50,8 @@ class Editor(Gtk.Grid):
 
         # SIGNAL CONNECTIONS
         self.textbuffer.connect_after("insert-text", self.insert_with_tags)
+        self.textbuffer.connect("delete-range",self.delete)
+        self.textbuffer.connect_after("delete-range",self.delete_after)
 
         #Shortcuts
         self.parent.connect('key-press-event',self.activate_shortcuts)
@@ -113,11 +118,6 @@ class Editor(Gtk.Grid):
 
     def apply_tag(self, widget, tag):
         limits = self.textbuffer.get_selection_bounds()
-        #if tag == 'just_right':
-        #    print 'ds'
-        #    current_position = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
-        #    next = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position+1)
-        #    self.textbuffer.apply_tag(self.tags[tag],current_position,next)
         if len(limits) != 0:
             start, end = limits
             if tag == 'header':
@@ -148,21 +148,18 @@ class Editor(Gtk.Grid):
         current_position = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
         current_line = current_position.get_line()
         current_line_offset = current_position.get_line_offset()
-        if current_line_offset == 0:
-            for button in self.just_buttons:
-                if button != tag:
-                    self.just_buttons[button] = False
-            self.just_buttons[tag] = True
+        start_iter = self.textbuffer.get_iter_at_line_offset(current_line,0)
+        if start_iter.get_chars_in_line() <= 1:
+            end_iter = self.textbuffer.get_iter_at_line_offset(current_line,0)
         else:
-            start_iter = self.textbuffer.get_iter_at_line_offset(current_line,0)
             end_iter = self.textbuffer.get_iter_at_line_offset(current_line,1)
-            for button in self.just_buttons:
-                if button != tag:
-                    self.just_buttons[button] = False
-                    self.textbuffer.remove_tag(self.tags[button],start_iter,end_iter)
-                else:
-                    self.just_buttons[tag] = True
-                    self.textbuffer.apply_tag(self.tags[tag],start_iter,end_iter)
+        for button in self.just_buttons:
+            if button != tag:
+                self.just_buttons[button] = False
+                self.textbuffer.remove_tag(self.tags[button],start_iter,end_iter)
+            else:
+                self.just_buttons[tag] = True
+                self.textbuffer.apply_tag(self.tags[tag],start_iter,end_iter)
 
 
     def insert_with_tags(self, buf, start_iter, data, data_len):
@@ -180,9 +177,41 @@ class Editor(Gtk.Grid):
                     self.textbuffer.apply_tag(self.tags[item],start_iter,end_iter)
                     self.textbuffer.place_cursor(end_iter)
         if self.format_toolbar.list.get_active():
+            new_iter = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
             if data == '\n':
-                new_iter = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
-                self.textbuffer.insert(new_iter,'\t- ', 3)
+                to_insert = '{}- '.format('\t'*self.current_indent_level)
+                self.textbuffer.insert(new_iter,to_insert, len(to_insert))
+            elif data == '\t':
+                current_line = new_iter.get_line()
+                start_iter = self.textbuffer.get_iter_at_line_offset(current_line,0)
+                end_iter = self.textbuffer.get_iter_at_line_offset(current_line,start_iter.get_chars_in_line()-1)
+                template = '\t'*self.current_indent_level+'- '
+                line_content = self.textbuffer.get_text(start_iter,end_iter,False)
+                if line_content in (template,template+'\t'):
+                    if line_content == template:
+                        remove_start_iter = self.textbuffer.get_iter_at_line_offset(current_line,self.current_indent_level+2)
+                        remove_end_iter = self.textbuffer.get_iter_at_line_offset(current_line,self.current_indent_level+3)
+                    else:
+                        remove_start_iter = self.textbuffer.get_iter_at_line_offset(current_line,self.current_indent_level+3)
+                        remove_end_iter = self.textbuffer.get_iter_at_line_offset(current_line,self.current_indent_level+4)
+                    self.textbuffer.delete(remove_start_iter,remove_end_iter)
+                    add_start_iter = self.textbuffer.get_iter_at_line_offset(current_line,0)
+                    self.textbuffer.insert(add_start_iter,'\t')
+                    self.current_indent_level += 1
+
+    def delete(self,buff, start,end):
+
+        if buff.get_text(start,end,False) == '\t' and start.get_line_offset() <= self.current_indent_level:
+            if self.current_indent_level > 1:
+                self.current_indent_level -= 1
+                self.offset_after_tab_deletion = start.get_offset()
+
+    def delete_after(self,buff,start,end):
+        if self.offset_after_tab_deletion:
+            self.textbuffer.insert(buff.get_iter_at_offset(self.offset_after_tab_deletion),'- ')
+            self.offset_after_tab_deletion = None
+
+
 
 
     def add_image(self, widget):
@@ -222,6 +251,8 @@ class Editor(Gtk.Grid):
         if self.format_toolbar.list.get_active():
             current_position = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
             self.textbuffer.insert(current_position, '\n\t- ')
+        else:
+            self.current_indent_level = 1
 
     def send_feedback(self, widget):
         try:
