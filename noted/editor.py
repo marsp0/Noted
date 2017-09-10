@@ -18,6 +18,7 @@ class Editor(Gtk.Grid):
         self.scrolled_window.set_hexpand(True)
         self.parent = parent
 
+        self.current_indent_level = 1
         self.offset_after_tab_deletion = None
 
         # TextView

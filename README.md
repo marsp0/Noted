@@ -23,7 +23,7 @@ git clone https://github.com/SuburbanFilth/Noted
 cd Noted
 dpkg-buildpackage -us -uc
 cd ../
-dpkg -i com.github.suburbanfilth.noted_0.1.0_amd64.deb
+dpkg -i com.github.suburbanfilth.noted_0.1.4_amd64.deb
 ```
 
 You should have the application installed and you can delete the temp folder.

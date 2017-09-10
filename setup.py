@@ -5,10 +5,10 @@ from distutils.core import setup
 
 install_data = [('share/applications', ['data/com.github.suburbanfilth.noted.desktop']),
                 ('share/metainfo', ['data/com.github.suburbanfilth.noted.appdata.xml']),
-                ('share/icons/hicolor/32x32/apps',['data/icons/32/Noted.png']),
-                ('share/icons/hicolor/48x48/apps',['data/icons/48/Noted.png']),
-                ('share/icons/hicolor/64x64/apps',['data/icons/64/Noted.png']),
-                ('share/icons/hicolor/128x128/apps',['data/icons/128/Noted.png'])]
+                ('share/icons/hicolor/32x32/apps',['data/icons/32/com.github.suburbanfilth.noted.png']),
+                ('share/icons/hicolor/48x48/apps',['data/icons/48/com.github.suburbanfilth.noted.png']),
+                ('share/icons/hicolor/64x64/apps',['data/icons/64/com.github.suburbanfilth.noted.png']),
+                ('share/icons/hicolor/128x128/apps',['data/icons/128/com.github.suburbanfilth.noted.png'])]
 
 setup(  name='Noted',
         version='0.1',
