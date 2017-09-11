@@ -12,7 +12,10 @@ Any help is welcomed :)
 
 # Installation
 
-To run the app you need SQLAlchemy, you can install it with `apt-get install python-sqlalchemy`
+To run the app you need :
+
+1. SQLAlchemy, you can install it with `apt-get install python-sqlalchemy`
+2. debhelper, you can get it with `apt-get install debhelper`
 
 Afterwards follow the steps below
 
