@@ -32,13 +32,20 @@ class Sidebar(Gtk.VBox):
         self.view.set_activate_on_single_click(True)
         self.view.append_column(Gtk.TreeViewColumn("Notes",
                                 self.renderer, text=0))
-
+        self.trash_iter = None
         # add
         self.scrolled_window.add(self.view)
         self.add(self.scrolled_window)
+        
+    def get_trash_iter(self):
+        for item in self.store:
+            if item[0] == 'Trash':
+                self.trash_iter = item.iter
 
     def add_notebook(self, name, notebook_id):
         notebook_iter = self.store.append(None, [name, notebook_id])
+        if self.trash_iter != None:
+            self.store.move_before(notebook_iter,self.trash_iter)
         return notebook_iter
 
     def add_item(self, title, note_id, notebook_iter=None):
@@ -49,7 +56,7 @@ class Sidebar(Gtk.VBox):
 
         if notebook_iter is None:
             parent_iter = self.get_selected()
-            if parent_iter is not None:
+            if parent_iter is not None and self.store[parent_iter][0] != 'Trash':
                 if self.store.iter_depth(parent_iter) != 0:
                     parent_iter = self.store.iter_parent(parent_iter)
                 self.store.append(parent_iter, [title, note_id])
@@ -68,8 +75,7 @@ class Sidebar(Gtk.VBox):
     def remove_item(self):
 
         item = self.get_selected()
-        print item
-        if item is not None:
+        if item is not None and self.store[item][0] != 'Trash':
             if len(self.store.get_path(item).to_string()) > 1:
                 note_id = self.store[item][1]
                 parent_iter = self.store.iter_parent(item)

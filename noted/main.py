@@ -22,7 +22,7 @@ class MainWindow(Gtk.Window):
         hbar = hb.Headerbar()
         hbar.connect("destroy", self.close_database)
         self.set_titlebar(hbar)
-
+        
         # Notebook button
         hbar.notebook_button.connect("clicked", self.create_notebook)
 
@@ -61,7 +61,7 @@ class MainWindow(Gtk.Window):
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
             name = dialog.entry.get_text()
-            if name != '':
+            if name != '' and name != 'Trash':
                 self.sidebar.add_notebook(name, self.notebook_id)
                 self.database.create_notebook(name,self.notebook_id)
                 self.notebook_id += 1
@@ -127,17 +127,37 @@ class MainWindow(Gtk.Window):
         db = shelve.open("{}/database.db".format(path))
         self.database = Database()
         self.database.start_database()
+        add_trash = True
         if not db:
             self.id = 1
             self.notebook_id = 1
         else:
             self.id = db['note_id']
             self.notebook_id = db['notebook_id']
-        for notebook in self.database.get_notebooks():
-            notebook_iter = self.sidebar.add_notebook(notebook.name, notebook.idd)
-            notes = self.database.get_notes_from_notebook(notebook.idd)
+        notebooks = self.database.get_notebooks()
+        #we do two iterations of the notebooks to get the trash first and then the rest.
+        # is there a better way ?
+        for notebook in notebooks:
+            if notebook.name == 'Trash':
+                add_trash = False
+                notebook_iter = self.sidebar.add_notebook(notebook.name, notebook.idd)
+                notes = self.database.get_notes_from_notebook(notebook.idd)
+                for note in notes:
+                    self.sidebar.add_item(note.name,note.idd,notebook_iter)
+        if add_trash:
+            self.database.create_notebook('Trash',self.notebook_id)
+            notebook_iter = self.sidebar.add_notebook('Trash', self.notebook_id)
+            notes = self.database.get_notes_from_notebook(self.notebook_id)
+            self.notebook_id += 1
             for note in notes:
                 self.sidebar.add_item(note.name,note.idd,notebook_iter)
+        self.sidebar.get_trash_iter()
+        for notebook in notebooks:
+            if notebook.name != 'Trash':
+                notebook_iter = self.sidebar.add_notebook(notebook.name, notebook.idd)
+                notes = self.database.get_notes_from_notebook(notebook.idd)
+                for note in notes:
+                    self.sidebar.add_item(note.name,note.idd,notebook_iter)
         db.close()
 
     def close_database(self, event):
