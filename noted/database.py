@@ -48,6 +48,8 @@ class Database(object):
 			trash_notebook = self.session.query(Notebook).filter_by(name='Trash').one()
 			for note in notes:
 				note.notebook_id = trash_notebook.idd
+				note.deleted_notebook_name = notebook.name
+				note.deleted_notebook_id = notebook.idd
 		self.session.commit()
 		self.session.delete(notebook)
 		self.session.commit()
@@ -60,8 +62,28 @@ class Database(object):
 			self.session.delete(note)
 		else:
 			note.notebook_id = trash_notebook.idd
+			note.deleted_notebook_name = notebook.name
+			note.deleted_notebook_id = notebook.idd
 		self.session.commit()
-
+		
+	def restore_note(self,idd):
+		note = self.session.query(Note).filter_by(idd=idd).one()
+		notebook_name = note.deleted_notebook_name
+		notebook = self.session.query(Notebook).filter_by(name = note.deleted_notebook_name, idd = note.deleted_notebook_id).first()
+		if notebook:
+			note.deleted_notebook_name = None
+			note.deleted_notebook_id = None
+			note.notebook_id = notebook.idd
+			result = False
+		else:
+			self.create_notebook(note.deleted_notebook_name,note.deleted_notebook_id)
+			note.notebook_id = note.deleted_notebook_id
+			note.deleted_notebook_name = None
+			note.deleted_notebook_id = None
+			result = True
+		self.session.commit()
+		return note.notebook_id,notebook_name,result
+			
 	def modify_note(self,name,content,idd):
 		note = self.session.query(Note).filter_by(idd=idd).one()
 		note.name = unicode(name,'iso-8859-1')

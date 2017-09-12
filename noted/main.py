@@ -44,7 +44,12 @@ class MainWindow(Gtk.Window):
         # SIDEBAR
         self.sidebar = sb.Sidebar()
         self.sidebar.view.connect("row_activated", self.show_note)
+        self.sidebar.view.connect('button-release-event',self.show_sidebar_options)
+        self.sidebar.sidebar_options['new'].connect('activate',self.create_note)
+        self.sidebar.sidebar_options['delete'].connect('activate',self.delete_note)
+        self.sidebar.sidebar_options['restore'].connect('activate',self.restore_note)
 
+        
         # EDITOR
         self.editor = editor.Editor(self)
 
@@ -54,8 +59,31 @@ class MainWindow(Gtk.Window):
         main_window.attach(self.sidebar, 0, 0, 1, 2)
         main_window.attach(self.editor, 1, 0, 2, 1)
         self.add(main_window)
+        
+    def show_sidebar_options(self,widget,event):
+        if event.button == 3:
+            try:
+                selected_iter = self.sidebar.get_selected()
+                selected = self.sidebar.store[selected_iter][0]
+                parent_iter = self.sidebar.get_parent(selected_iter)
+                if parent_iter != None:
+                    parent = self.sidebar.store[parent_iter][0]
+                else:
+                    parent = None
+                if parent == 'Trash' or selected == 'Trash':
+                    self.sidebar.sidebar_options['new'].set_sensitive(False)
+                    self.sidebar.sidebar_options['delete'].set_sensitive(True)
+                    self.sidebar.sidebar_options['restore'].set_sensitive(True)
+                else:
+                    self.sidebar.sidebar_options['restore'].set_sensitive(False)
+                    self.sidebar.sidebar_options['new'].set_sensitive(True)
+                    self.sidebar.sidebar_options['delete'].set_sensitive(True)
+                self.sidebar.menu.popup(None,None,None,None,event.button,event.time)
+            except TypeError:
+                #there was no selection when the click occured
+                pass
 
-    def create_notebook(self, button):
+    def create_notebook(self, widget):
         # creates a new notebook
         dialog = nd.NameDialog(self)
         response = dialog.run()
@@ -67,14 +95,14 @@ class MainWindow(Gtk.Window):
                 self.notebook_id += 1
         dialog.destroy()
 
-    def create_note(self, button):
+    def create_note(self, widget):
         if self.sidebar.add_item("New Note", self.id):
             self.editor.set_text("")
             parent_id = self.sidebar.get_id(self.sidebar.get_selected())
             self.database.create_note("New Note",'',self.id, parent_id)
             self.id += 1
 
-    def delete_note(self, button):
+    def delete_note(self, widget):
         dialog = dd.DeleteDialog(self)
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
@@ -87,7 +115,32 @@ class MainWindow(Gtk.Window):
                 else:
                     self.database.delete_notebook(parent_id)
         dialog.destroy()
-
+        
+    def restore_note(self,widget):
+        selected = self.sidebar.get_selected()
+        if self.sidebar.store[selected][0] != 'Trash':
+            idd = self.sidebar.get_id(self.sidebar.get_selected())
+            note = self.database.get_note(idd)
+            notebook_id,notebook_name,result = self.database.restore_note(idd)
+            self.sidebar.remove_item()
+            if result:
+                parent_iter = self.sidebar.add_notebook(notebook_name,notebook_id)
+                self.sidebar.add_item(note.name,idd,parent_iter)
+                self.editor.set_text("")
+            else:
+                #means we have to add to an existing notebook
+                #this part should be moved to the sidebar module given that is processing done by it
+                children = self.sidebar.store.iter_n_children(None)
+                current = 0
+                current_child = self.sidebar.store.iter_children(None)
+                while current < children:
+                    item = self.sidebar.store[current_child]
+                    if item[0] == notebook_name and item[1] == notebook_id:
+                        self.sidebar.add_item(note.name,idd,item.iter)
+                    current_child = self.sidebar.store.iter_next(item.iter)
+                    current += 1
+                self.editor.set_text("")
+    
     def show_note(self, treeview, path, col):
         if len(path) > 1:
             parent_iter = self.sidebar.get_parent(treeview.get_selection().get_selected()[1])
@@ -106,19 +159,21 @@ class MainWindow(Gtk.Window):
         path = self.sidebar.get_selected()
         # check if something was selected and that it was not a notebook
         if path is not None and len(self.sidebar.get_path(path).to_string()) > 1:
-            clean_text = self.editor.get_clean_text()
-            if clean_text != "":
-                title = self.get_title(clean_text)
+            parent = self.sidebar.get_parent(path)
+            if self.sidebar.store[parent][0] != 'Trash':
+                clean_text = self.editor.get_clean_text()
+                if clean_text != "":
+                    title = self.get_title(clean_text)
 
-            else:
-                title = "New Note"
+                else:
+                    title = "New Note"
 
-            content = self.editor.get_text()
-            parent_iter = self.sidebar.get_parent(path)
-            parent_id = self.sidebar.get_id(parent_iter)
-            note_id = self.sidebar.get_id(path)
-            self.database.modify_note(title,content,note_id)
-            self.sidebar.modify_item(path, title)
+                content = self.editor.get_text()
+                parent_iter = self.sidebar.get_parent(path)
+                parent_id = self.sidebar.get_id(parent_iter)
+                note_id = self.sidebar.get_id(path)
+                self.database.modify_note(title,content,note_id)
+                self.sidebar.modify_item(path, title)
 
     def start_database(self):
         path = "{}/Noted".format(GLib.get_user_data_dir())
@@ -142,7 +197,6 @@ class MainWindow(Gtk.Window):
                 add_trash = False
                 notebook_iter = self.sidebar.add_notebook('Trash', notebook.idd)
                 notes = self.database.get_notes_from_notebook(notebook.idd)
-                print notes
                 for note in notes:
                     self.sidebar.add_item(note.name,note.idd,notebook_iter)
         if add_trash:

@@ -33,6 +33,23 @@ class Sidebar(Gtk.VBox):
         self.view.append_column(Gtk.TreeViewColumn("Notes",
                                 self.renderer, text=0))
         self.trash_iter = None
+        
+        self.selection = self.view.get_selection()
+        
+        self.sidebar_options = {}
+        self.menu = Gtk.Menu()
+        item_new = Gtk.MenuItem('New')
+        self.menu.append(item_new)
+        self.sidebar_options['new'] = item_new
+        item_delete = Gtk.MenuItem("Delete")
+        self.menu.append(item_delete)
+        self.sidebar_options['delete'] = item_delete
+        item_restore = Gtk.MenuItem("Restore")
+        self.menu.append(item_restore)
+        self.sidebar_options['restore'] = item_restore
+        self.menu.show_all()
+        self.menu.attach_to_widget(self.view,None)
+        
         # add
         self.scrolled_window.add(self.view)
         self.add(self.scrolled_window)
