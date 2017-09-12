@@ -25,7 +25,10 @@ class Database(object):
 		self.session.close()
 
 	def create_note(self,name,content,idd,notebook_id):
-		note = Note(name=unicode(name,'iso-8859-1'),content=unicode(content,'iso-8859-1'),idd = idd,notebook_id = notebook_id)
+		try:
+			note = Note(name=unicode(name,'iso-8859-1'),content=unicode(content,'iso-8859-1'),idd = idd,notebook_id = notebook_id)
+		except TypeError:
+			note = Note(name=name,content=content,idd=idd,notebook_id=notebook_id)
 		self.session.add(note)
 		self.session.commit()
 
@@ -37,14 +40,26 @@ class Database(object):
 	def delete_notebook(self,idd):
 		notes = self.session.query(Note).filter_by(notebook_id=idd).all()
 		notebook = self.session.query(Notebook).filter_by(idd=idd).one()
-		for note in notes:
-			self.session.delete(note)
+
+		if notebook.name == 'Trash':
+			for note in notes:
+				self.session.delete(note)
+		else:
+			trash_notebook = self.session.query(Notebook).filter_by(name='Trash').one()
+			for note in notes:
+				note.notebook_id = trash_notebook.idd
+		self.session.commit()
 		self.session.delete(notebook)
 		self.session.commit()
 
 	def delete_note(self,idd):
 		note = self.session.query(Note).filter_by(idd=idd).one()
-		self.session.delete(note)
+		notebook = self.session.query(Notebook).filter_by(idd=note.notebook_id).one()
+		trash_notebook = self.session.query(Notebook).filter_by(name='Trash').one()
+		if notebook.name == 'Trash':
+			self.session.delete(note)
+		else:
+			note.notebook_id = trash_notebook.idd
 		self.session.commit()
 
 	def modify_note(self,name,content,idd):

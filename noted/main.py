@@ -140,17 +140,15 @@ class MainWindow(Gtk.Window):
         for notebook in notebooks:
             if notebook.name == 'Trash':
                 add_trash = False
-                notebook_iter = self.sidebar.add_notebook(notebook.name, notebook.idd)
+                notebook_iter = self.sidebar.add_notebook('Trash', notebook.idd)
                 notes = self.database.get_notes_from_notebook(notebook.idd)
+                print notes
                 for note in notes:
                     self.sidebar.add_item(note.name,note.idd,notebook_iter)
         if add_trash:
             self.database.create_notebook('Trash',self.notebook_id)
             notebook_iter = self.sidebar.add_notebook('Trash', self.notebook_id)
-            notes = self.database.get_notes_from_notebook(self.notebook_id)
             self.notebook_id += 1
-            for note in notes:
-                self.sidebar.add_item(note.name,note.idd,notebook_iter)
         self.sidebar.get_trash_iter()
         for notebook in notebooks:
             if notebook.name != 'Trash':

@@ -80,9 +80,20 @@ class Sidebar(Gtk.VBox):
                 note_id = self.store[item][1]
                 parent_iter = self.store.iter_parent(item)
                 parent_id = self.get_id(parent_iter)
+                if parent_id != self.get_id(self.trash_iter):
+                    self.add_item(self.store[item][0],note_id,self.trash_iter)
             else:
                 parent_id = self.store[item][1]
                 note_id = None
+                children_amount = self.store.iter_n_children(item)
+                counter = 0
+                current_child = self.store.iter_children(item)
+                while counter < children_amount:
+                    title = self.store[current_child][0]
+                    idd = self.store[current_child][1]
+                    self.add_item(title,idd,self.trash_iter)
+                    counter += 1
+                    current_child = self.store.iter_next(current_child)
             self.store.remove(item)
             return note_id, parent_id
 

@@ -20,4 +20,4 @@ class Note(Base) :
 	idd = Column(Integer,primary_key=True)
 	name = Column(String(250), nullable=False)
 	content = Column(Text)
-	notebook_id = Column(Integer, ForeignKey("notebook.idd"))
+	notebook_id = Column(Integer, ForeignKey("notebook.idd"))	
