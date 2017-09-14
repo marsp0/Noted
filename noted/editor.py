@@ -278,34 +278,6 @@ class Editor(Gtk.Grid):
                 if self.just_buttons[item] == True:
                     self.textbuffer.apply_tag(self.tags[item],start_iter,end_iter)
                     self.textbuffer.place_cursor(end_iter)
-                    
-        if self.format_toolbar.list.get_active() and not self.undo_in_progress:
-            new_iter = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
-            if data == '\n':
-                for i in xrange(self.current_indent_level):
-                    self.textbuffer.insert(new_iter,'\t')
-                    new_iter.forward_char()
-                self.textbuffer.insert(new_iter,'-')
-                new_iter.forward_char()
-                self.textbuffer.insert(new_iter,' ')
-            elif data == '\t':
-                current_line = new_iter.get_line()
-                start_iter = self.textbuffer.get_iter_at_line_offset(current_line,0)
-                end_iter = self.textbuffer.get_iter_at_line_offset(current_line,start_iter.get_chars_in_line()-1)
-                template = '\t'*self.current_indent_level+'- '
-                line_content = self.textbuffer.get_text(start_iter,end_iter,False)
-                if line_content in (template,template+'\t'):
-                    if line_content == template:
-                        remove_start_iter = self.textbuffer.get_iter_at_line_offset(current_line,self.current_indent_level+2)
-                        remove_end_iter = self.textbuffer.get_iter_at_line_offset(current_line,self.current_indent_level+3)
-                    else:
-                        remove_start_iter = self.textbuffer.get_iter_at_line_offset(current_line,self.current_indent_level+3)
-                        remove_end_iter = self.textbuffer.get_iter_at_line_offset(current_line,self.current_indent_level+4)
-                    self.textbuffer.delete(remove_start_iter,remove_end_iter)
-                    add_start_iter = self.textbuffer.get_iter_at_line_offset(current_line,0)
-                    self.textbuffer.insert(add_start_iter,'\t')
-                    self.current_indent_level += 1
-        self.textview.grab_focus()
         ##########
         #undo part
         ##########
@@ -343,6 +315,35 @@ class Editor(Gtk.Grid):
         else:
             self.undo_stack.append(prev_insert)
             self.undo_stack.append(undo_action)
+        #########
+        #END UNDO
+        #########
+            
+        if self.format_toolbar.list.get_active() and not self.undo_in_progress:
+            new_iter = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
+            if data == '\n':
+                for i in xrange(self.current_indent_level):
+                    self.textbuffer.insert(new_iter,'\t')
+                self.textbuffer.insert(new_iter,'-')
+                self.textbuffer.insert(new_iter,' ')
+            elif data == '\t':
+                current_line = new_iter.get_line()
+                start_iter = self.textbuffer.get_iter_at_line_offset(current_line,0)
+                end_iter = self.textbuffer.get_iter_at_line_offset(current_line,start_iter.get_chars_in_line()-1)
+                template = '\t'*self.current_indent_level+'- '
+                line_content = self.textbuffer.get_text(start_iter,end_iter,False)
+                if line_content in (template,template+'\t'):
+                    if line_content == template:
+                        remove_start_iter = self.textbuffer.get_iter_at_line_offset(current_line,self.current_indent_level+2)
+                        remove_end_iter = self.textbuffer.get_iter_at_line_offset(current_line,self.current_indent_level+3)
+                    else:
+                        remove_start_iter = self.textbuffer.get_iter_at_line_offset(current_line,self.current_indent_level+3)
+                        remove_end_iter = self.textbuffer.get_iter_at_line_offset(current_line,self.current_indent_level+4)
+                    self.textbuffer.delete(remove_start_iter,remove_end_iter)
+                    add_start_iter = self.textbuffer.get_iter_at_line_offset(current_line,0)
+                    self.textbuffer.insert(add_start_iter,'\t')
+                    self.current_indent_level += 1
+        self.textview.grab_focus()
 
     def delete(self,buff, start,end):
         if buff.get_text(start,end,False) == '\t' and start.get_line_offset() <= self.current_indent_level:
@@ -548,3 +549,7 @@ class Editor(Gtk.Grid):
                 self.format_toolbar.list.set_active(False)
             else:
                 self.format_toolbar.list.set_active(True)
+        elif ctrl and keyval_name == 'z':
+            self.undo(None)
+        elif ctrl and keyval_name == 'y':
+            self.redo(None)
