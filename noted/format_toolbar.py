@@ -35,9 +35,6 @@ class FormatBar(Gtk.Box):
         self.underline.add(image)
         self.underline.set_tooltip_text("Underline (Ctrl+U)")
 
-        # ubuntu font
-        self.ubuntu = Gtk.ToggleButton.new_with_label("Ubuntu Mono")
-
         # font size
         # self.size = Gtk.Entry()
         # self.size.set_text(str(12))
@@ -95,17 +92,17 @@ class FormatBar(Gtk.Box):
         self.header = Gtk.Button.new_with_label("H")
         self.header.set_tooltip_text("Header (Ctrl+H)")
 
-        #self.undo = Gtk.Button()
-        #image = Gtk.Image.new_from_icon_name("edit-undo-symbolic",Gtk.IconSize.MENU)
-        #image.show()
-        #self.undo.add(image)
-        #self.undo.set_tooltip_text("Undo")
+        self.undo = Gtk.Button()
+        image = Gtk.Image.new_from_icon_name("edit-undo-symbolic",Gtk.IconSize.MENU)
+        image.show()
+        self.undo.add(image)
+        self.undo.set_tooltip_text("Undo")
 
-        #self.redo = Gtk.Button()
-        #image = Gtk.Image.new_from_icon_name("edit-redo-symbolic",Gtk.IconSize.MENU)
-        #image.show()
-        #self.redo.add(image)
-        #self.redo.set_tooltip_text("Redo")
+        self.redo = Gtk.Button()
+        image = Gtk.Image.new_from_icon_name("edit-redo-symbolic",Gtk.IconSize.MENU)
+        image.show()
+        self.redo.add(image)
+        self.redo.set_tooltip_text("Redo")
 
         self.list = Gtk.ToggleButton()
         image = Gtk.Image.new_from_icon_name("view-list-compact-symbolic", Gtk.IconSize.MENU)
@@ -117,7 +114,6 @@ class FormatBar(Gtk.Box):
         self.buttons['bold'] = self.bold
         self.buttons['italic'] = self.italic
         self.buttons['underline'] = self.underline
-        self.buttons['ubuntu'] = self.ubuntu
 
         self.pack_end(self.send_feedback, False, False, 0)
 
@@ -128,11 +124,12 @@ class FormatBar(Gtk.Box):
         self.pack_start(self.title, False, False, 0)
         self.pack_start(self.header, False, False, 0)
         #self.pack_start(self.image, False, False, 0)
-        self.pack_start(self.ubuntu, False, False, 0)
         self.pack_start(self.just_left, False, False, 0)
         self.pack_start(self.just_center, False, False, 0)
         self.pack_start(self.just_right, False, False, 0)
         self.pack_start(self.just_fill, False, False, 0)
-        #self.pack_start(self.undo,False,False,0)
-        #self.pack_start(self.redo,False,False,0)
         self.pack_start(self.list,False,False,0)
+        self.pack_start(self.undo,False,False,0)
+        self.pack_start(self.redo,False,False,0)
+        
+        
