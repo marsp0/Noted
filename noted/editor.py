@@ -400,13 +400,11 @@ class Editor(Gtk.Grid):
             self.offset_after_tab_deletion = None
             
     def undo(self,widget):
-        print self.undo_stack
         if not self.undo_stack:
             return
         self.not_undoable_action = True
         self.undo_in_progress = True
         undo_action = self.undo_stack.pop()
-        print undo_action.text
         self.redo_stack.append(undo_action)
         if isinstance(undo_action,UndoableInsert):
             start = self.textbuffer.get_iter_at_offset(undo_action.offset)
@@ -425,7 +423,6 @@ class Editor(Gtk.Grid):
         else:
             start = self.textbuffer.get_iter_at_offset(undo_action.start)
             self.textbuffer.insert(start,undo_action.text)
-            print repr(undo_action.text), 123
             end = self.textbuffer.get_iter_at_offset(undo_action.end)
             for tag in undo_action.tags:
                 self.textbuffer.apply_tag(tag,start,end)
