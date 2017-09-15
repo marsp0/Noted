@@ -315,6 +315,7 @@ class Editor(Gtk.Grid):
         else:
             self.undo_stack.append(prev_insert)
             self.undo_stack.append(undo_action)
+            
         #########
         #END UNDO
         #########
@@ -333,20 +334,20 @@ class Editor(Gtk.Grid):
                 template = '\t'*self.current_indent_level+'- '
                 line_content = self.textbuffer.get_text(start_iter,end_iter,False)
                 if line_content in (template,template+'\t'):
-                    if line_content == template:
-                        remove_start_iter = self.textbuffer.get_iter_at_line_offset(current_line,self.current_indent_level+2)
-                        remove_end_iter = self.textbuffer.get_iter_at_line_offset(current_line,self.current_indent_level+3)
-                    else:
-                        remove_start_iter = self.textbuffer.get_iter_at_line_offset(current_line,self.current_indent_level+3)
-                        remove_end_iter = self.textbuffer.get_iter_at_line_offset(current_line,self.current_indent_level+4)
-                    self.textbuffer.delete(remove_start_iter,remove_end_iter)
+                    #we need to remove the tab just inserted after the dash
+                    remove_start = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position-1)
+                    remove_end = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
+                    self.textbuffer.delete(remove_start,remove_end)
                     add_start_iter = self.textbuffer.get_iter_at_line_offset(current_line,0)
                     self.textbuffer.insert(add_start_iter,'\t')
                     self.current_indent_level += 1
         self.textview.grab_focus()
 
     def delete(self,buff, start,end):
-        if buff.get_text(start,end,False) == '\t' and start.get_line_offset() <= self.current_indent_level:
+        if buff.get_text(start,end,False) == '\t' and \
+        start.get_line_offset() <= self.current_indent_level and \
+        not self.not_undoable_action:
+        
             if self.current_indent_level > 1:
                 self.current_indent_level -= 1
                 self.offset_after_tab_deletion = start.get_offset()
@@ -394,15 +395,18 @@ class Editor(Gtk.Grid):
 
     def delete_after(self,buff,start,end):
         if self.offset_after_tab_deletion:
-            self.textbuffer.insert(buff.get_iter_at_offset(self.offset_after_tab_deletion),'- ')
+            self.textbuffer.insert(buff.get_iter_at_offset(self.offset_after_tab_deletion),'-',1)
+            self.textbuffer.insert(buff.get_iter_at_offset(self.offset_after_tab_deletion+1),' ',1)
             self.offset_after_tab_deletion = None
             
     def undo(self,widget):
+        print self.undo_stack
         if not self.undo_stack:
             return
         self.not_undoable_action = True
         self.undo_in_progress = True
         undo_action = self.undo_stack.pop()
+        print undo_action.text
         self.redo_stack.append(undo_action)
         if isinstance(undo_action,UndoableInsert):
             start = self.textbuffer.get_iter_at_offset(undo_action.offset)
@@ -421,6 +425,7 @@ class Editor(Gtk.Grid):
         else:
             start = self.textbuffer.get_iter_at_offset(undo_action.start)
             self.textbuffer.insert(start,undo_action.text)
+            print repr(undo_action.text), 123
             end = self.textbuffer.get_iter_at_offset(undo_action.end)
             for tag in undo_action.tags:
                 self.textbuffer.apply_tag(tag,start,end)
