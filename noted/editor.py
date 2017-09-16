@@ -79,10 +79,10 @@ class Editor(Gtk.Grid):
         
         self.textview = Gtk.TextView()
         self.textview.set_wrap_mode(3)
-        self.textview.set_bottom_margin(5)
-        self.textview.set_top_margin(5)
-        self.textview.set_left_margin(5)
-        self.textview.set_right_margin(5)
+        self.textview.set_bottom_margin(10)
+        self.textview.set_top_margin(10)
+        self.textview.set_left_margin(10)
+        self.textview.set_right_margin(10)
         self.textview.modify_font(Pango.FontDescription.from_string("11"))
         self.textbuffer = self.textview.get_buffer()
         self.serialized_format = self.textbuffer.register_serialize_tagset()
@@ -187,6 +187,8 @@ class Editor(Gtk.Grid):
     def set_text(self, content):
         self.textbuffer.set_text("")
         if content != "":
+            self.undo_stack = []
+            self.redo_stack = []
             self.textbuffer.deserialize(self.textbuffer,
                                         self.deserialized_format,
                                         self.textbuffer.get_start_iter(),
@@ -415,7 +417,6 @@ class Editor(Gtk.Grid):
             start = self.textbuffer.get_iter_at_offset(undo_action.start)
             end = self.textbuffer.get_iter_at_offset(undo_action.end)
             self.textbuffer.remove_tag(self.tags[undo_action.tag],start,end)
-            self.textview.grab_focus()
         elif isinstance(undo_action,UndoableDeleteTag):
             start = self.textbuffer.get_iter_at_offset(undo_action.start)
             end = self.textbuffer.get_iter_at_offset(undo_action.end)
