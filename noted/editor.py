@@ -187,16 +187,21 @@ class Editor(Gtk.Grid):
     def set_text(self, content):
         self.textbuffer.set_text("")
         if content != "":
-            self.undo_stack = []
-            self.redo_stack = []
+            
             self.textbuffer.deserialize(self.textbuffer,
                                         self.deserialized_format,
                                         self.textbuffer.get_start_iter(),
                                         content.encode("iso-8859-1"))
+            self.undo_stack = []
+            self.redo_stack = []
         else:
             pass
 
     def toggle_tag(self, widget, tag):
+        #
+        # Toggles tag on selection, it does not do anything if there is no selection
+        # adds the UndoableInsertTag/UndoableDeleteTag to the undo stack
+        #
         limits = self.textbuffer.get_selection_bounds()
         if len(limits) != 0:
             start, end = limits
@@ -226,6 +231,10 @@ class Editor(Gtk.Grid):
         self.textview.grab_focus()
 
     def apply_tag(self, widget, tag):
+        #
+        # Applyes tag on selection, this is currently used
+        # only for header and title. It also adds the UndoableInsertTag to the undo stack
+        #
         limits = self.textbuffer.get_selection_bounds()
         if len(limits) != 0:
             start, end = limits
@@ -247,6 +256,10 @@ class Editor(Gtk.Grid):
         self.textview.grab_focus()
 
     def apply_just(self,widget,tag):
+        # gets an itter at the current offset and then gets the current line from it.
+        # if there is only one char,then the start iter and the end iter are the same.
+        # This was done in case that one char is just a new line.
+        # then we iterate over the just buttons to disable the rest and apply just one of them
         current_position = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
         current_line = current_position.get_line()
         current_line_offset = current_position.get_line_offset()
@@ -271,10 +284,14 @@ class Editor(Gtk.Grid):
         #gets invalidated for some reason
         start_iter = self.textbuffer.get_iter_at_offset(end-1)
         end_iter = self.textbuffer.get_iter_at_offset(end)
+        #
+        # we check if there is no undo in progress to avoid applying toggled tags
+        # to text that is part of an undo
         if not self.undo_in_progress:
             for tag in self.format_toolbar.buttons:
                 if self.format_toolbar.buttons[tag].get_active():
                     self.textbuffer.apply_tag(self.tags[tag], start_iter, end_iter)
+        #NOTE : add just to the undo system
         if start_iter.get_line_offset() == 0:
             for item in self.just_buttons:
                 if self.just_buttons[item] == True:
@@ -284,6 +301,8 @@ class Editor(Gtk.Grid):
         #undo part
         ##########
         def can_be_merged(prev,cur):
+            # can be merged determines if we can add two insertions into one
+            # if they are whitespace or differ by type, then we cannot merge them
             if not cur.mergeable or not prev.mergeable:
                 return False
             elif cur.offset != (prev.offset + prev.len):
@@ -296,6 +315,7 @@ class Editor(Gtk.Grid):
         
         if not self.undo_in_progress:
             self.redo_stack = []
+        # if it is not an undoable action then we return
         if self.not_undoable_action:
             return
         current_cursor_position = self.textbuffer.props.cursor_position
@@ -323,6 +343,10 @@ class Editor(Gtk.Grid):
         #########
             
         if self.format_toolbar.list.get_active() and not self.undo_in_progress:
+            # if there is a new line and the list option is active, then we add tabs and dash
+            # if the entered char is a tab and the text on the line is in the form '\t\t- '
+            # where the amount of tab depeneds on the current indent leve, then we delete the
+            # tab from the end and add one at the begining
             new_iter = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
             if data == '\n':
                 for i in xrange(self.current_indent_level):
@@ -333,7 +357,7 @@ class Editor(Gtk.Grid):
                 current_line = new_iter.get_line()
                 start_iter = self.textbuffer.get_iter_at_line_offset(current_line,0)
                 end_iter = self.textbuffer.get_iter_at_line_offset(current_line,start_iter.get_chars_in_line()-1)
-                template = '\t'*self.current_indent_level+'- '
+                template = '\t'* self.current_indent_level + '- '
                 line_content = self.textbuffer.get_text(start_iter,end_iter,False)
                 if line_content in (template,template+'\t'):
                     #we need to remove the tab just inserted after the dash
