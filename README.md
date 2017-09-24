@@ -8,7 +8,7 @@ The Trello board can be found here : https://trello.com/b/mc6cU0Mn
 
 Any help is welcomed :)
 
-![noted](https://user-images.githubusercontent.com/7538637/29683863-8d766598-8918-11e7-8cbf-bc9e47198ca5.png)
+![noted](https://github.com/mirkobrombin/Noted/raw/master/screenshot.png)
 
 # Installation
 
@@ -26,7 +26,7 @@ git clone https://github.com/SuburbanFilth/Noted
 cd Noted
 dpkg-buildpackage -us -uc
 cd ../
-dpkg -i com.github.suburbanfilth.noted_0.1.4_amd64.deb
+dpkg -i *.deb
 ```
 
 You should have the application installed and you can delete the temp folder.
