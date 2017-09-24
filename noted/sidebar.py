@@ -1,9 +1,12 @@
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
+from logger import logger as lg
 
 
 class Sidebar(Gtk.VBox):
+
+    logger = lg.Logger()
 
     def __init__(self):
 
@@ -53,18 +56,21 @@ class Sidebar(Gtk.VBox):
         # add
         self.scrolled_window.add(self.view)
         self.add(self.scrolled_window)
-        
+
+    @lg.logging_decorator(logger)
     def get_trash_iter(self):
         for item in self.store:
             if item[0] == 'Trash':
                 self.trash_iter = item.iter
 
+    @lg.logging_decorator(logger)
     def add_notebook(self, name, notebook_id):
         notebook_iter = self.store.append(None, [name, notebook_id])
         if self.trash_iter != None:
             self.store.move_before(notebook_iter,self.trash_iter)
         return notebook_iter
 
+    @lg.logging_decorator(logger)
     def add_item(self, title, note_id, notebook_iter=None):
         # Adds one item to the store
         # there is an option to pass notebook iter.
@@ -84,11 +90,13 @@ class Sidebar(Gtk.VBox):
                 return True
         return False
 
+    @lg.logging_decorator(logger)
     def modify_item(self, path, title):
 
         if self.store[path][0] != title:
             self.store[path][0] = title
 
+    @lg.logging_decorator(logger)
     def remove_item(self):
 
         item = self.get_selected()
@@ -114,21 +122,26 @@ class Sidebar(Gtk.VBox):
             self.store.remove(item)
             return note_id, parent_id
 
+    @lg.logging_decorator(logger)
     def get_id(self, path):
         # get db id from TreePath
         return self.store[path][1]
 
+    @lg.logging_decorator(logger)
     def get_selected(self):
         # returns an iter to the selected row
         return self.view.get_selection().get_selected()[1]
 
+    @lg.logging_decorator(logger)
     def get_path(self, iter_node):
         # returns TreePath representing the path to the selected node
         return self.store.get_path(iter_node)
 
+    @lg.logging_decorator(logger)
     def get_parent(self, iter_node):
         # get parent of a selected note
         return self.store.iter_parent(iter_node)
 
+    @lg.logging_decorator(logger)
     def get_iter_from_path(self, path):
         return self.store.get_iter(path)

@@ -8,7 +8,7 @@ The Trello board can be found here : https://trello.com/b/mc6cU0Mn
 
 Any help is welcomed :)
 
-![noted](https://github.com/mirkobrombin/Noted/raw/master/screenshot.png)
+![noted](https://raw.githubusercontent.com/suburbanfilth/Noted/master/screenshot.png)
 
 # Installation
 

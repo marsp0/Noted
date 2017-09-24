@@ -4,11 +4,15 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, Pango, GdkPixbuf
 import format_toolbar as ft
 import subprocess
+from logger import logger as lg
 
 WHITESPACE = ('\r', '\n', '\t', ' ')
 
 class UndoableInsert(object):
 
+    logger = lg.Logger()
+
+    @lg.logging_decorator(logger)
     def __init__(self,text_iter,text,text_len):
 
         self.offset = text_iter.get_offset()
@@ -22,6 +26,9 @@ class UndoableInsert(object):
 
 class UndoableDelete(object):
 
+    logger = lg.Logger()
+
+    @lg.logging_decorator(logger)
     def __init__(self,buf, start_iter,end_iter):
 
         self.text = buf.get_text(start_iter, end_iter,False)
@@ -39,7 +46,10 @@ class UndoableDelete(object):
             self.mergeable = True
             
 class UndoableInsertTag(object):
+
+    logger = lg.Logger()
     
+    @lg.logging_decorator(logger)
     def __init__(self, tag, start, end):
         self.tag = tag
         self.start = start.get_offset()
@@ -48,6 +58,9 @@ class UndoableInsertTag(object):
         
 class UndoableDeleteTag(object):
 
+    logger = lg.Logger()
+
+    @lg.logging_decorator(logger)
     def __init__(self,tag,start,end):
         self.tag = tag
         self.start = start.get_offset()
@@ -57,6 +70,9 @@ class UndoableDeleteTag(object):
 
 class Editor(Gtk.Grid):
 
+    logger = lg.Logger()
+
+    @lg.logging_decorator(logger)
     def __init__(self,parent):
 
         Gtk.Grid.__init__(self, row_spacing=5, column_spacing=2)
@@ -169,6 +185,7 @@ class Editor(Gtk.Grid):
         self.attach(self.scrolled_window, 0, 0, 2, 1)
         self.attach(self.format_toolbar, 0, 1, 2, 1)
 
+    @lg.logging_decorator(logger)
     def get_text(self,start=None,end=None):
         if not start:
             start = self.textbuffer.get_start_iter()
@@ -179,11 +196,13 @@ class Editor(Gtk.Grid):
                                          start,
                                          end)
 
+    @lg.logging_decorator(logger)
     def get_clean_text(self):
 
         return self.textbuffer.get_text(self.textbuffer.get_start_iter(),
                                         self.textbuffer.get_end_iter(), False)
 
+    @lg.logging_decorator(logger)
     def set_text(self, content):
         self.textbuffer.set_text("")
         if content != "":
@@ -197,6 +216,7 @@ class Editor(Gtk.Grid):
         else:
             pass
 
+    @lg.logging_decorator(logger)
     def toggle_tag(self, widget, tag):
         #
         # Toggles tag on selection, it does not do anything if there is no selection
@@ -230,6 +250,7 @@ class Editor(Gtk.Grid):
                 self.undo_stack.append(undo_action)
         self.textview.grab_focus()
 
+    @lg.logging_decorator(logger)
     def apply_tag(self, widget, tag):
         #
         # Applyes tag on selection, this is currently used
@@ -255,6 +276,7 @@ class Editor(Gtk.Grid):
             self.undo_stack.append(undo_action)
         self.textview.grab_focus()
 
+    @lg.logging_decorator(logger)
     def apply_just(self,widget,tag):
         # gets an itter at the current offset and then gets the current line from it.
         # if there is only one char,then the start iter and the end iter are the same.
@@ -277,7 +299,7 @@ class Editor(Gtk.Grid):
                 self.textbuffer.apply_tag(self.tags[tag],start_iter,end_iter)
         self.textview.grab_focus()
 
-
+    @lg.logging_decorator(logger)
     def insert_with_tags(self, buf, start_iter, data, data_len):
         end = self.textbuffer.props.cursor_position
         #creating new start iter because the provided one
@@ -369,6 +391,7 @@ class Editor(Gtk.Grid):
                     self.current_indent_level += 1
         self.textview.grab_focus()
 
+    @lg.logging_decorator(logger)
     def delete(self,buff, start,end):
         if buff.get_text(start,end,False) == '\t' and \
         start.get_line_offset() <= self.current_indent_level and \
@@ -419,12 +442,14 @@ class Editor(Gtk.Grid):
             self.undo_stack.append(prev_delete)
             self.undo_stack.append(undo_action)
 
+    @lg.logging_decorator(logger)
     def delete_after(self,buff,start,end):
         if self.offset_after_tab_deletion:
             self.textbuffer.insert(buff.get_iter_at_offset(self.offset_after_tab_deletion),'-',1)
             self.textbuffer.insert(buff.get_iter_at_offset(self.offset_after_tab_deletion+1),' ',1)
             self.offset_after_tab_deletion = None
-            
+
+    @lg.logging_decorator(logger)
     def undo(self,widget):
         if not self.undo_stack:
             return
@@ -458,7 +483,8 @@ class Editor(Gtk.Grid):
         self.textview.grab_focus()
         self.not_undoable_action = False
         self.undo_in_progress = False
-        
+
+    @lg.logging_decorator(logger)
     def redo(self,widget):
         if not self.redo_stack:
             return
@@ -492,6 +518,7 @@ class Editor(Gtk.Grid):
         self.not_undoable_action = False
         self.undo_in_progress = False
 
+    @lg.logging_decorator(logger)
     def add_image(self, widget):
         dialog = Gtk.FileChooserDialog("Pick a file",
                                        None,
@@ -525,6 +552,7 @@ class Editor(Gtk.Grid):
 
         dialog.destroy()
 
+    @lg.logging_decorator(logger)
     def add_list(self,widget):
         if self.format_toolbar.list.get_active():
             current_position = self.textbuffer.get_iter_at_offset(self.textbuffer.props.cursor_position)
@@ -532,13 +560,15 @@ class Editor(Gtk.Grid):
         else:
             self.current_indent_level = 1
 
+    @lg.logging_decorator(logger)
     def send_feedback(self, widget):
         try:
             result = subprocess.call(
                 ["pantheon-mail", "mailto:notedfeedback@gmail.com"])
         except OSError:
             pass
-
+            
+    @lg.logging_decorator(logger)
     def activate_shortcuts(self,widget,event):
         keyval = event.keyval
         keyval_name = Gdk.keyval_name(keyval)

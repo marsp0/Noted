@@ -10,8 +10,11 @@ from dialogs import delete_dialog as dd
 from database import Database
 import os
 import subprocess
+from logger import logger as lg
 
 class MainWindow(Gtk.Window):
+
+    logger = lg.Logger()
 
     def __init__(self):
         Gtk.Window.__init__(self, title="Noted")
@@ -22,7 +25,7 @@ class MainWindow(Gtk.Window):
         hbar = hb.Headerbar()
         hbar.connect("destroy", self.close_database)
         self.set_titlebar(hbar)
-        
+
         # Notebook button
         hbar.notebook_button.connect("clicked", self.create_notebook)
 
@@ -59,7 +62,8 @@ class MainWindow(Gtk.Window):
         main_window.attach(self.sidebar, 0, 0, 1, 2)
         main_window.attach(self.editor, 1, 0, 2, 1)
         self.add(main_window)
-        
+
+    @lg.logging_decorator(logger)
     def show_sidebar_options(self,widget,event):
         if event.button == 3:
             try:
@@ -83,6 +87,7 @@ class MainWindow(Gtk.Window):
                 #there was no selection when the click occured
                 pass
 
+    @lg.logging_decorator(logger)
     def create_notebook(self, widget):
         # creates a new notebook
         dialog = nd.NameDialog(self)
@@ -95,6 +100,7 @@ class MainWindow(Gtk.Window):
                 self.notebook_id += 1
         dialog.destroy()
 
+    @lg.logging_decorator(logger)
     def create_note(self, widget):
         if self.sidebar.add_item("New Note", self.id):
             self.editor.set_text("")
@@ -102,6 +108,7 @@ class MainWindow(Gtk.Window):
             self.database.create_note("New Note",'',self.id, parent_id)
             self.id += 1
 
+    @lg.logging_decorator(logger)
     def delete_note(self, widget):
         dialog = dd.DeleteDialog(self)
         response = dialog.run()
@@ -115,7 +122,8 @@ class MainWindow(Gtk.Window):
                 else:
                     self.database.delete_notebook(parent_id)
         dialog.destroy()
-        
+
+    @lg.logging_decorator(logger)        
     def restore_note(self,widget):
         selected = self.sidebar.get_selected()
         if self.sidebar.store[selected][0] != 'Trash':
@@ -140,7 +148,8 @@ class MainWindow(Gtk.Window):
                     current_child = self.sidebar.store.iter_next(item.iter)
                     current += 1
                 self.editor.set_text("")
-    
+
+    @lg.logging_decorator(logger)    
     def show_note(self, treeview, path, col):
         if len(path) > 1:
             parent_iter = self.sidebar.get_parent(treeview.get_selection().get_selected()[1])
@@ -154,7 +163,7 @@ class MainWindow(Gtk.Window):
                 treeview.expand_row(path, True)
             else:
                 treeview.collapse_row(path)
-
+    @lg.logging_decorator(logger)
     def save_note(self, event):
         path = self.sidebar.get_selected()
         # check if something was selected and that it was not a notebook
@@ -174,7 +183,7 @@ class MainWindow(Gtk.Window):
                 note_id = self.sidebar.get_id(path)
                 self.database.modify_note(title,content,note_id)
                 self.sidebar.modify_item(path, title)
-
+    @lg.logging_decorator(logger)
     def start_database(self):
         path = "{}/Noted".format(GLib.get_user_data_dir())
         if not os.path.exists(path):
@@ -212,6 +221,7 @@ class MainWindow(Gtk.Window):
                     self.sidebar.add_item(note.name,note.idd,notebook_iter)
         db.close()
 
+    @lg.logging_decorator(logger)
     def close_database(self, event):
         path = GLib.get_user_data_dir()
         db = shelve.open("{}/Noted/database.db".format(path))
@@ -221,7 +231,7 @@ class MainWindow(Gtk.Window):
         self.database.close_database()
         self.hide()
         Gtk.main_quit()
-
+    @lg.logging_decorator(logger)
     def get_title(self, content):
 
         content = content.lstrip()
@@ -234,11 +244,12 @@ class MainWindow(Gtk.Window):
             title = content
         return title
 
+    @lg.logging_decorator(logger)
     def on_button_clicked(self, widget, tag):
 
         self.editor.toggle_tag(tag, None)
 
-
+    @lg.logging_decorator(logger)
     def on_key_press(self,widget,event):
         keyval = event.keyval
         keyval_name = Gdk.keyval_name(keyval)
