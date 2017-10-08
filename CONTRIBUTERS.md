@@ -9,6 +9,6 @@ Noted contributors
 
   * Undo/redo functionality
 
-* **[Mirko Brombin](https://github.com/mirkobrombin)
+* **[Mirko Brombin](https://github.com/mirkobrombin)**
 
   * Fixed #13 and updated the Screenshot

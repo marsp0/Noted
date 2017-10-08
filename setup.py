@@ -17,5 +17,5 @@ setup(  name='Noted',
         url='https://github.com/SuburbanFilth/noted',
         license='GNU GPL2',
         scripts=['com.github.suburbanfilth.noted'],
-        packages=['noted', 'noted/dialogs'],
+        packages=['noted', 'noted/dialogs', 'noted/logger'],
         data_files=install_data)
